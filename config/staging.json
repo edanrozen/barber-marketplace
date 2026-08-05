@@ -1,0 +1,7 @@
+{
+  "app": {
+    "logLevel": "debug"
+  },
+  "environment": "staging",
+  "//": "Staging overrides merged over config/default.json. No secrets."
+}

@@ -1,0 +1,16 @@
+{
+  "app": {
+    "port": 3000,
+    "logLevel": "info"
+  },
+  "locale": {
+    "defaultLocale": "he-IL",
+    "rtl": true,
+    "currency": "ILS",
+    "timezone": "Asia/Jerusalem"
+  },
+  "marketplace": {
+    "launchZone": "tel-aviv"
+  },
+  "//": "Non-secret configuration only. Secrets are injected from AWS Secrets Manager at runtime (see .env.example). Israel-first defaults: Hebrew locale, RTL, ILS, Asia/Jerusalem."
+}
