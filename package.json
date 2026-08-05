@@ -11,5 +11,8 @@
   "engines": {
     "node": ">=20"
   },
-  "//": "backend is ONE workspace (a modular monolith). backend/modules/* are FOLDERS, not separate packages — per the Engineering Constitution ('modules are folders, not services'). Package manager, tooling, and scripts are added in later Sprint-1 tasks (E1.2 / E2)."
+  "scripts": {
+    "bootstrap": "bash scripts/bootstrap.sh"
+  },
+  "//": "backend is ONE workspace (a modular monolith); backend/modules/* are FOLDERS, not packages (Engineering Constitution). Lint/format/hook scripts and devDependencies are added in T1.2.1; build/test scripts in E2/E10."
 }
