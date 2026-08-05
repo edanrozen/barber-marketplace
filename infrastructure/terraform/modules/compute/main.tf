@@ -86,6 +86,12 @@ resource "aws_ecs_service" "backend" {
   desired_count   = 1 # staging; scale for production
   launch_type     = "FARGATE"
 
+  # Progressive delivery + automatic rollback (backs the CD workflow's rollback).
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+
   network_configuration {
     subnets          = var.public_subnet_ids
     security_groups  = [var.app_security_group]
