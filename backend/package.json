@@ -1,0 +1,24 @@
+{
+  "name": "@barber-marketplace/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Modular-monolith backend (NestJS). One deployable; modules are folders.",
+  "main": "dist/app/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/app/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "//": "Dependencies are the NestJS runtime required by the locked Technology Stack (justified per Constitution §VI). Version ranges are conservative; exact versions are resolved and locked by the lockfile on `npm install` in the networked dev environment, where the team confirms the current stable NestJS major. reflect-metadata is a NestJS peer requirement."
+}

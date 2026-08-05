@@ -1,0 +1,15 @@
+{
+  "name": "barber-marketplace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "At-home barber marketplace — Israel-first, Hebrew/RTL. Modular monolith, TypeScript everywhere.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "//": "backend is ONE workspace (a modular monolith). backend/modules/* are FOLDERS, not separate packages — per the Engineering Constitution ('modules are folders, not services'). Package manager, tooling, and scripts are added in later Sprint-1 tasks (E1.2 / E2)."
+}
