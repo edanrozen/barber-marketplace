@@ -8,3 +8,5 @@ export * from './version';
 export * from './headers';
 export * from './pagination';
 export * from './error-response';
+export * from './auth';
+export * from './profile';
