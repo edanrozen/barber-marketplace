@@ -6,7 +6,8 @@
     "moduleResolution": "bundler",
     "paths": {
       "@barber-marketplace/api-contracts": ["../../packages/api-contracts/src/index.ts"],
-      "@barber-marketplace/validation": ["../../packages/validation/src/index.ts"]
+      "@barber-marketplace/validation": ["../../packages/validation/src/index.ts"],
+      "@barber-marketplace/i18n": ["../../packages/i18n/src/index.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

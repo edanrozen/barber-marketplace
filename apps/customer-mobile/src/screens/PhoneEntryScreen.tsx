@@ -21,7 +21,7 @@ export function PhoneEntryScreen({ navigation }: Props): React.JSX.Element {
       const { challengeId } = await requestOtp(phone);
       navigation.navigate('OtpEntry', { challengeId, phone });
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('errorGeneric'));
+      setError(e instanceof Error ? e.message : t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -29,13 +29,13 @@ export function PhoneEntryScreen({ navigation }: Props): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('phoneTitle')}</Text>
-      <Text style={styles.subtitle}>{t('phoneSubtitle')}</Text>
+      <Text style={styles.title}>{t('auth.phoneTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.phoneSubtitle')}</Text>
       <TextInput
         style={styles.input}
         value={phone}
         onChangeText={setPhone}
-        placeholder={t('phonePlaceholder')}
+        placeholder={t('auth.phonePlaceholder')}
         placeholderTextColor={theme.colors.muted}
         keyboardType="phone-pad"
         textAlign="right"
@@ -43,7 +43,7 @@ export function PhoneEntryScreen({ navigation }: Props): React.JSX.Element {
       />
       {error !== null && <Text style={styles.error}>{error}</Text>}
       <TouchableOpacity style={styles.button} onPress={submit} disabled={loading} accessibilityRole="button">
-        {loading ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('phoneCta')}</Text>}
+        {loading ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('auth.phoneCta')}</Text>}
       </TouchableOpacity>
     </View>
   );

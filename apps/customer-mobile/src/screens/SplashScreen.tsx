@@ -7,9 +7,9 @@ import { t } from '../i18n';
 export function SplashScreen(): React.JSX.Element {
   return (
     <View style={styles.container}>
-      <Text style={styles.brand}>{t('appName')}</Text>
+      <Text style={styles.brand}>{t('common.appName')}</Text>
       <ActivityIndicator color={theme.colors.primary} style={styles.spinner} />
-      <Text style={styles.loading}>{t('loading')}</Text>
+      <Text style={styles.loading}>{t('common.loading')}</Text>
     </View>
   );
 }

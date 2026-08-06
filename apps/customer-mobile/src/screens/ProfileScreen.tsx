@@ -25,7 +25,7 @@ export function ProfileScreen(_props: Props): React.JSX.Element {
         setPhone(me.phone);
         setDisplayName(me.displayName ?? '');
       } catch (e) {
-        setError(e instanceof Error ? e.message : t('errorGeneric'));
+        setError(e instanceof Error ? e.message : t('common.error'));
       } finally {
         setLoading(false);
       }
@@ -39,9 +39,9 @@ export function ProfileScreen(_props: Props): React.JSX.Element {
     try {
       const me = await updateMe(displayName);
       setDisplayName(me.displayName ?? '');
-      setMessage(t('profileSaved'));
+      setMessage(t('profile.saved'));
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('errorGeneric'));
+      setError(e instanceof Error ? e.message : t('common.error'));
     } finally {
       setSaving(false);
     }
@@ -57,17 +57,17 @@ export function ProfileScreen(_props: Props): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('profileTitle')}</Text>
+      <Text style={styles.title}>{t('profile.title')}</Text>
 
-      <Text style={styles.label}>{t('profilePhone')}</Text>
+      <Text style={styles.label}>{t('profile.phone')}</Text>
       <Text style={styles.readonly}>{phone}</Text>
 
-      <Text style={styles.label}>{t('profileName')}</Text>
+      <Text style={styles.label}>{t('profile.name')}</Text>
       <TextInput
         style={styles.input}
         value={displayName}
         onChangeText={setDisplayName}
-        placeholder={t('profileNamePlaceholder')}
+        placeholder={t('profile.namePlaceholder')}
         placeholderTextColor={theme.colors.muted}
         textAlign="right"
       />
@@ -76,10 +76,10 @@ export function ProfileScreen(_props: Props): React.JSX.Element {
       {error !== null && <Text style={styles.error}>{error}</Text>}
 
       <TouchableOpacity style={styles.button} onPress={save} disabled={saving} accessibilityRole="button">
-        {saving ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('profileSave')}</Text>}
+        {saving ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('common.save')}</Text>}
       </TouchableOpacity>
       <TouchableOpacity style={styles.logout} onPress={() => void logout()} accessibilityRole="button">
-        <Text style={styles.logoutText}>{t('homeLogout')}</Text>
+        <Text style={styles.logoutText}>{t('home.logout')}</Text>
       </TouchableOpacity>
     </View>
   );

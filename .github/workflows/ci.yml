@@ -20,6 +20,8 @@ jobs:
         run: npm run format:check
       - name: Lint
         run: npm run lint
+      - name: i18n string gate (no hard-coded UI strings)
+        run: node scripts/check-no-hardcoded-strings.mjs
       - name: Build backend
         run: npm run build -w @barber-marketplace/backend
       - name: Test

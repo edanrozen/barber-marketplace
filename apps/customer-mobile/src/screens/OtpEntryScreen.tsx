@@ -22,21 +22,21 @@ export function OtpEntryScreen({ route }: Props): React.JSX.Element {
       // On success, auth status flips to 'authenticated' and the navigator swaps to the app stack.
       await verifyOtp(challengeId, code);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('errorGeneric'));
+      setError(e instanceof Error ? e.message : t('common.error'));
       setLoading(false);
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('otpTitle')}</Text>
-      <Text style={styles.subtitle}>{t('otpSubtitle')}</Text>
+      <Text style={styles.title}>{t('auth.otpTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.otpSubtitle')}</Text>
       <Text style={styles.phone}>{phone}</Text>
       <TextInput
         style={styles.input}
         value={code}
         onChangeText={setCode}
-        placeholder={t('otpPlaceholder')}
+        placeholder={t('auth.otpPlaceholder')}
         placeholderTextColor={theme.colors.muted}
         keyboardType="number-pad"
         maxLength={6}
@@ -45,7 +45,7 @@ export function OtpEntryScreen({ route }: Props): React.JSX.Element {
       />
       {error !== null && <Text style={styles.error}>{error}</Text>}
       <TouchableOpacity style={styles.button} onPress={submit} disabled={loading} accessibilityRole="button">
-        {loading ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('otpCta')}</Text>}
+        {loading ? <ActivityIndicator color={theme.colors.bg} /> : <Text style={styles.buttonText}>{t('auth.otpCta')}</Text>}
       </TouchableOpacity>
     </View>
   );

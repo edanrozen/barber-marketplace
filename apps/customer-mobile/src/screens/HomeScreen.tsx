@@ -13,15 +13,15 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.greeting}>{t('homeGreeting')}</Text>
-        <Text style={styles.title}>{user?.phone ?? t('appName')}</Text>
+        <Text style={styles.greeting}>{t('home.greeting')}</Text>
+        <Text style={styles.title}>{user?.phone ?? t('common.appName')}</Text>
       </View>
       <View>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Profile')} accessibilityRole="button">
-          <Text style={styles.buttonText}>{t('homeProfileCta')}</Text>
+          <Text style={styles.buttonText}>{t('home.profileCta')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.logout} onPress={() => void logout()} accessibilityRole="button">
-          <Text style={styles.logoutText}>{t('homeLogout')}</Text>
+          <Text style={styles.logoutText}>{t('home.logout')}</Text>
         </TouchableOpacity>
       </View>
     </View>
