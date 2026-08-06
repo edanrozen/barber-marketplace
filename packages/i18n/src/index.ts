@@ -1,9 +1,9 @@
 /**
  * @barber-marketplace/i18n
- *
- * Hebrew string catalog and RTL / Israeli-format utilities. Content added in Epic E6 (i18n/RTL).
- *
- * Empty package scaffold (Sprint 1, T1.1.3). Contents are added in the relevant
- * epic. This barrel is the package public entry point.
+ * Locale abstraction + Hebrew catalog + Israeli formatters. Single source of truth for all
+ * user-facing strings and IL formatting across clients. Populated in Epic E6 (Hebrew-first, add-locale-ready).
  */
-export {};
+export * from './locale';
+export * from './catalog';
+export * from './translate';
+export * from './format';

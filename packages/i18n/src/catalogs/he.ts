@@ -1,0 +1,23 @@
+/** Hebrew string catalog (V1 default). Namespaced dotted keys. No user-facing string is hard-coded in clients. */
+export const he = {
+  'common.loading': 'טוען…',
+  'common.save': 'שמירה',
+  'common.error': 'אירעה שגיאה. נסו שוב.',
+  'common.appName': 'ספר שכונה',
+  'auth.phoneTitle': 'התחברות',
+  'auth.phoneSubtitle': 'הזינו את מספר הטלפון הנייד שלכם ונשלח קוד אימות',
+  'auth.phonePlaceholder': 'מספר טלפון (05X-XXXXXXX)',
+  'auth.phoneCta': 'שליחת קוד אימות',
+  'auth.otpTitle': 'אימות',
+  'auth.otpSubtitle': 'הזינו את הקוד בן שש הספרות שנשלח אליכם',
+  'auth.otpPlaceholder': 'קוד אימות',
+  'auth.otpCta': 'אימות והתחברות',
+  'home.greeting': 'שלום',
+  'home.profileCta': 'הפרופיל שלי',
+  'home.logout': 'התנתקות',
+  'profile.title': 'הפרופיל שלי',
+  'profile.phone': 'טלפון',
+  'profile.name': 'שם תצוגה',
+  'profile.namePlaceholder': 'הזינו שם תצוגה',
+  'profile.saved': 'הפרטים נשמרו בהצלחה',
+} as const;
