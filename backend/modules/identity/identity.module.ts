@@ -22,11 +22,14 @@ export const PG_POOL = Symbol('PG_POOL');
     { provide: PG_POOL, useFactory: () => new Pool({ connectionString: process.env['DATABASE_URL'] }) },
     {
       provide: AUTH_CONFIG,
-      useFactory: () => ({
-        jwtSecret: process.env['APP_JWT_SIGNING_KEY'] ?? '',
-        otpPepper: process.env['OTP_PEPPER'] ?? '',
-        accessTtlSeconds: 900,
-      }),
+      useFactory: () => {
+        const jwtSecret = process.env['APP_JWT_SIGNING_KEY'];
+        const otpPepper = process.env['OTP_PEPPER'];
+        if (jwtSecret === undefined || jwtSecret.length === 0 || otpPepper === undefined || otpPepper.length === 0) {
+          throw new Error('APP_JWT_SIGNING_KEY and OTP_PEPPER must be set — refusing to start with empty auth secrets.');
+        }
+        return { jwtSecret, otpPepper, accessTtlSeconds: 900 };
+      },
     },
     { provide: OTP_STORE, useFactory: (pool: Pool) => new PgOtpStore(pool), inject: [PG_POOL] },
     { provide: REFRESH_TOKEN_STORE, useFactory: (pool: Pool) => new PgRefreshTokenStore(pool), inject: [PG_POOL] },
