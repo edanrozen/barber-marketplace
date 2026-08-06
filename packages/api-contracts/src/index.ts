@@ -10,3 +10,4 @@ export * from './pagination';
 export * from './error-response';
 export * from './auth';
 export * from './profile';
+export * from './professional';
