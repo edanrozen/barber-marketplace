@@ -1,1 +1,1 @@
-export * from './professionals.module';
+export { ProfessionalsModule } from './professionals.module';
