@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "ספר שכונה",
+    "slug": "barber-marketplace-customer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "barbermarketplace",
+    "userInterfaceStyle": "light",
+    "locales": { "he": {} },
+    "extra": { "apiBaseUrl": "http://localhost:3000" },
+    "ios": { "supportsTablet": false },
+    "android": { "package": "com.barbermarketplace.customer" }
+  }
+}

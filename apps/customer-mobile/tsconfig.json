@@ -1,0 +1,13 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@barber-marketplace/api-contracts": ["../../packages/api-contracts/src/index.ts"],
+      "@barber-marketplace/validation": ["../../packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
