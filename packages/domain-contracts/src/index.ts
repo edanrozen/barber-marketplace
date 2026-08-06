@@ -1,9 +1,8 @@
 /**
  * @barber-marketplace/domain-contracts
- *
- * Shared domain entity and DTO definitions used across bounded contexts.
- *
- * Empty package scaffold (Sprint 1, T1.1.3). Contents are added in the relevant
- * epic. This barrel is the package public entry point.
+ * Shared domain primitives used across bounded contexts (IDs, Money, Roles).
+ * Populated in Epic E4 (T4.2.1). Category-agnostic per ADR-002.
  */
-export {};
+export * from './ids';
+export * from './money';
+export * from './roles';
