@@ -14,3 +14,4 @@ export * from './professional';
 export * from './availability';
 export * from './booking';
 export * from './notification';
+export * from './payment';
