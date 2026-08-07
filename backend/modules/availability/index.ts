@@ -1,1 +1,1 @@
-export * from './availability.module';
+export { AvailabilityModule } from './availability.module';
