@@ -32,3 +32,16 @@ test('minutesToHHmm formats correctly', () => {
   assert.equal(minutesToHHmm(5), '00:05');
   assert.equal(minutesToHHmm(1230), '20:30');
 });
+
+import { removeBookedStarts, hhmmToMinutes } from './slots';
+test('removeBookedStarts filters taken slots', () => {
+  assert.deepEqual(removeBookedStarts([540, 570, 600], [570]), [540, 600]);
+  assert.deepEqual(removeBookedStarts([540, 570], []), [540, 570]);
+  assert.deepEqual(removeBookedStarts([540], [540]), []);
+});
+test('hhmmToMinutes parses and validates', () => {
+  assert.equal(hhmmToMinutes('09:00'), 540);
+  assert.equal(hhmmToMinutes('20:30'), 1230);
+  assert.equal(hhmmToMinutes('24:00'), null);
+  assert.equal(hhmmToMinutes('9:00'), null);
+});

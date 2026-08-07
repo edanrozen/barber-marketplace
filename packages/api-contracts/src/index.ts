@@ -12,3 +12,4 @@ export * from './auth';
 export * from './profile';
 export * from './professional';
 export * from './availability';
+export * from './booking';

@@ -34,3 +34,19 @@ export const minutesToHHmm = (m: number): string => {
   const min = m % 60;
   return `${h < 10 ? `0${h}` : `${h}`}:${min < 10 ? `0${min}` : `${min}`}`;
 };
+
+/** Remove already-booked start minutes from a candidate slot list. */
+export const removeBookedStarts = (starts: readonly number[], bookedStarts: readonly number[]): number[] => {
+  const taken = new Set(bookedStarts);
+  return starts.filter((s) => !taken.has(s));
+};
+
+/** 'HH:mm' → minutes from midnight, or null if malformed. */
+export const hhmmToMinutes = (hhmm: string): number | null => {
+  const m = /^(\d{2}):(\d{2})$/.exec(hhmm);
+  if (m === null) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
+  return h * 60 + min;
+};
