@@ -5,6 +5,7 @@ import type { AvailabilityResponse, ProfessionalDetail } from '@barber-marketpla
 import { formatCurrencyILS, formatDateIL } from '@barber-marketplace/i18n';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { getAvailability, getProfessional } from '../api/professionals-api';
+import { createBooking } from '../api/bookings-api';
 import { theme } from '../theme';
 import { t } from '../i18n';
 
@@ -45,6 +46,27 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
       }
     })();
   }, [id, selectedServiceId]);
+
+  function confirmBook(date: string, start: string): void {
+    const serviceId = selectedServiceId;
+    if (serviceId === null) return;
+    Alert.alert(t('booking.confirmTitle'), `${date} · ${start}`, [
+      { text: t('booking.dismiss'), style: 'cancel' },
+      { text: t('booking.confirm'), onPress: () => void doBook(serviceId, date, start) },
+    ]);
+  }
+  async function doBook(serviceId: string, date: string, start: string): Promise<void> {
+    try {
+      await createBooking({ professionalId: id, serviceId, date, start });
+      Alert.alert(t('booking.success'));
+      setAvailLoading(true);
+      setAvailability(await getAvailability(id, serviceId));
+    } catch (e) {
+      Alert.alert(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setAvailLoading(false);
+    }
+  }
 
   if (loading) return <View style={[styles.container, styles.center]}><ActivityIndicator color={theme.colors.primary} /></View>;
   if (error !== null || pro === null) return <View style={[styles.container, styles.center]}><Text style={styles.error}>{error ?? t('common.error')}</Text></View>;
@@ -110,7 +132,7 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
                 <Text style={styles.dayLabel}>{formatDateIL(new Date(y ?? 2000, (mo ?? 1) - 1, d ?? 1))}</Text>
                 <View style={styles.slotWrap}>
                   {day.slots.map((slot) => (
-                    <TouchableOpacity key={slot.start} style={styles.slot} onPress={() => Alert.alert(t('pro.bookingSoon'))} accessibilityRole="button">
+                    <TouchableOpacity key={slot.start} style={styles.slot} onPress={() => confirmBook(day.date, slot.start)} accessibilityRole="button">
                       <Text style={styles.slotText}>{slot.start}</Text>
                     </TouchableOpacity>
                   ))}

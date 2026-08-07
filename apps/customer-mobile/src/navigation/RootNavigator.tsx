@@ -7,6 +7,7 @@ import { OtpEntryScreen } from '../screens/OtpEntryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ProfessionalScreen } from '../screens/ProfessionalScreen';
+import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
   Professional: { id: string };
+  MyBookings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,6 +39,7 @@ export function RootNavigator(): React.JSX.Element {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Professional" component={ProfessionalScreen} />
+          <Stack.Screen name="MyBookings" component={MyBookingsScreen} />
         </Stack.Group>
       ) : (
         <Stack.Group>
