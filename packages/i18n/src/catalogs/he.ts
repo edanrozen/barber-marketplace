@@ -54,4 +54,8 @@ export const he = {
   'confirm.backHome': 'חזרה לדף הבית',
   'notif.title': 'התראות',
   'notif.empty': 'אין התראות חדשות',
+  'payment.label': 'תשלום',
+  'payment.cashOnArrival': 'מזומן בהגעה',
+  'payment.pending': 'ממתין לתשלום',
+  'payment.paid': 'שולם',
 } as const;

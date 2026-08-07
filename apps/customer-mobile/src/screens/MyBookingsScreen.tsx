@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { BookingView } from '@barber-marketplace/api-contracts';
+import type { BookingView, PaymentView } from '@barber-marketplace/api-contracts';
 import { formatCurrencyILS } from '@barber-marketplace/i18n';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { cancelBooking, listMyBookings } from '../api/bookings-api';
+import { listPayments } from '../api/payments-api';
 import { theme } from '../theme';
 import { t } from '../i18n';
 
@@ -16,15 +17,26 @@ function statusLabel(status: string): string {
   if (status === 'cancelled') return t('booking.statusCancelled');
   return t('booking.statusCompleted');
 }
+function paymentText(p: PaymentView | undefined): string {
+  if (p === undefined) return '';
+  const method = p.method === 'cash' ? t('payment.cashOnArrival') : p.method;
+  const status = p.status === 'paid' ? t('payment.paid') : t('payment.pending');
+  return `${t('payment.label')}: ${method} \u00b7 ${status}`;
+}
 
 export function MyBookingsScreen(_props: Props): React.JSX.Element {
   const [items, setItems] = useState<BookingView[]>([]);
+  const [payments, setPayments] = useState<Record<string, PaymentView>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      setItems(await listMyBookings());
+      const [bs, ps] = await Promise.all([listMyBookings(), listPayments()]);
+      setItems(bs);
+      const map: Record<string, PaymentView> = {};
+      for (const p of ps) map[p.bookingId] = p;
+      setPayments(map);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('common.error'));
@@ -65,8 +77,9 @@ export function MyBookingsScreen(_props: Props): React.JSX.Element {
                 <Text style={styles.status}>{statusLabel(item.status)}</Text>
               </View>
               <Text style={styles.service}>{item.serviceName}</Text>
-              <Text style={styles.meta}>{`${item.date}  ·  ${item.start}\u2013${item.end}`}</Text>
+              <Text style={styles.meta}>{`${item.date}  \u00b7  ${item.start}\u2013${item.end}`}</Text>
               <Text style={styles.price}>{formatCurrencyILS(item.priceMinorUnits)}</Text>
+              {payments[item.id] !== undefined && <Text style={styles.payment}>{paymentText(payments[item.id])}</Text>}
               {item.status === 'confirmed' && (
                 <TouchableOpacity style={styles.cancel} onPress={() => void onCancel(item.id)} accessibilityRole="button">
                   <Text style={styles.cancelText}>{t('booking.cancelCta')}</Text>
@@ -94,6 +107,7 @@ const styles = StyleSheet.create({
   service: { color: theme.colors.text, fontSize: 15, marginTop: 4, textAlign: 'right' },
   meta: { color: theme.colors.muted, fontSize: 14, marginTop: 2, textAlign: 'right' },
   price: { color: theme.colors.primary, fontSize: 16, fontWeight: '700', marginTop: 4, textAlign: 'right' },
+  payment: { color: theme.colors.text, fontSize: 13, marginTop: 4, textAlign: 'right' },
   cancel: { marginTop: theme.spacing(1.5), alignItems: 'center', paddingVertical: theme.spacing(1) },
   cancelText: { color: theme.colors.danger, fontSize: 15, fontWeight: '600' },
 });

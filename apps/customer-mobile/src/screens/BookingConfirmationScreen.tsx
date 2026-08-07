@@ -21,6 +21,7 @@ export function BookingConfirmationScreen({ route, navigation }: Props): React.J
           <Text style={styles.service}>{booking.serviceName}</Text>
           <Text style={styles.meta}>{`${booking.date}  \u00b7  ${booking.start}\u2013${booking.end}`}</Text>
           <Text style={styles.price}>{formatCurrencyILS(booking.priceMinorUnits)}</Text>
+          <Text style={styles.payment}>{`${t('payment.label')}: ${t('payment.cashOnArrival')}`}</Text>
         </View>
       </View>
       <View style={styles.actions}>
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
   service: { color: theme.colors.text, fontSize: 16, marginTop: 4 },
   meta: { color: theme.colors.muted, fontSize: 14, marginTop: 4 },
   price: { color: theme.colors.primary, fontSize: 18, fontWeight: '700', marginTop: 6 },
+  payment: { color: theme.colors.muted, fontSize: 14, marginTop: 6 },
   actions: { gap: theme.spacing(1.5) },
   primary: { backgroundColor: theme.colors.primary, borderRadius: theme.radius, padding: theme.spacing(2), alignItems: 'center' },
   primaryText: { color: theme.colors.bg, fontSize: 18, fontWeight: '700' },
