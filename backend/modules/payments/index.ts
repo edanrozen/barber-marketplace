@@ -1,1 +1,2 @@
-export * from './payments.module';
+export { PaymentsModule } from './payments.module';
+export { PaymentsService } from './application/payments.service';

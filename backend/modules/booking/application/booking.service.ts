@@ -6,6 +6,7 @@ import { hhmmToMinutes, minutesToHHmm } from '../../availability/domain/slots';
 import { canCancel } from '../domain/booking';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../ports/ports';
 import { NotificationsService } from '../../notifications';
+import { PaymentsService } from '../../payments';
 
 @Injectable()
 export class BookingService {
@@ -13,6 +14,7 @@ export class BookingService {
     @Inject(BOOKING_REPOSITORY) private readonly repo: BookingRepository,
     private readonly availability: AvailabilityService,
     private readonly notifications: NotificationsService,
+    private readonly payments: PaymentsService,
   ) {}
 
   async createBooking(customerUserId: string, body: CreateBookingBody): Promise<BookingView> {
@@ -38,6 +40,12 @@ export class BookingService {
         professionalName: snapshot.professionalName, serviceName: snapshot.serviceName, date: body.date, start: body.start,
       });
     } catch { /* notifications are best-effort */ }
+
+    try {
+      await this.payments.initiateForBooking({
+        bookingId: created.id, customerUserId, amountMinorUnits: snapshot.priceMinorUnits, currency: snapshot.currency, method: 'cash',
+      });
+    } catch { /* best-effort; a transactional outbox links booking+payment in the real env */ }
 
     return {
       id: created.id, professionalId: body.professionalId, professionalName: snapshot.professionalName,
