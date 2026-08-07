@@ -13,3 +13,4 @@ export * from './profile';
 export * from './professional';
 export * from './availability';
 export * from './booking';
+export * from './notification';
