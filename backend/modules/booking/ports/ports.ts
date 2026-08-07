@@ -12,7 +12,8 @@ export interface BookingRepository {
   getServiceSnapshot(professionalId: string, serviceId: string): Promise<ServiceSnapshot | null>;
   create(input: CreateBookingInput): Promise<CreateResult>;
   listByCustomer(customerUserId: string): Promise<readonly BookingView[]>;
-  getOwned(customerUserId: string, bookingId: string): Promise<{ id: string; status: string } | null>;
+  getOwned(customerUserId: string, bookingId: string): Promise<OwnedBooking | null>;
   cancel(bookingId: string): Promise<void>;
 }
+export interface OwnedBooking { id: string; status: string; professionalName: string; serviceName: string; date: string; start: string; }
 export const BOOKING_REPOSITORY = Symbol('BOOKING_REPOSITORY');

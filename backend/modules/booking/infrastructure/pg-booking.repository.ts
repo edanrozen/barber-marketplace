@@ -56,10 +56,18 @@ export class PgBookingRepository implements BookingRepository {
     }));
   }
 
-  async getOwned(customerUserId: string, bookingId: string): Promise<{ id: string; status: string } | null> {
-    const r = await this.pool.query('SELECT id, status FROM bookings WHERE id = $1 AND customer_user_id = $2', [bookingId, customerUserId]);
-    const row = r.rows[0] as { id: string; status: string } | undefined;
-    return row ?? null;
+  async getOwned(customerUserId: string, bookingId: string): Promise<import('../ports/ports').OwnedBooking | null> {
+    const r = await this.pool.query(
+      `SELECT b.id, b.status, p.display_name AS professional_name, s.name AS service_name,
+              to_char(b.scheduled_date, 'YYYY-MM-DD') AS date, b.start_minute
+       FROM bookings b
+       JOIN professional_profiles p ON p.id = b.professional_profile_id
+       JOIN professional_services s ON s.id = b.service_id
+       WHERE b.id = $1 AND b.customer_user_id = $2`,
+      [bookingId, customerUserId],
+    );
+    const row = r.rows[0] as { id: string; status: string; professional_name: string; service_name: string; date: string; start_minute: number } | undefined;
+    return row ? { id: row.id, status: row.status, professionalName: row.professional_name, serviceName: row.service_name, date: row.date, start: minutesToHHmm(row.start_minute) } : null;
   }
 
   async cancel(bookingId: string): Promise<void> {

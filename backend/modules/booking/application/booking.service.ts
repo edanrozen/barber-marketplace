@@ -5,12 +5,14 @@ import { AvailabilityService } from '../../availability/application/availability
 import { hhmmToMinutes, minutesToHHmm } from '../../availability/domain/slots';
 import { canCancel } from '../domain/booking';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../ports/ports';
+import { NotificationsService } from '../../notifications';
 
 @Injectable()
 export class BookingService {
   constructor(
     @Inject(BOOKING_REPOSITORY) private readonly repo: BookingRepository,
     private readonly availability: AvailabilityService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async createBooking(customerUserId: string, body: CreateBookingBody): Promise<BookingView> {
@@ -31,6 +33,12 @@ export class BookingService {
     });
     if (!created.ok) throw new ConflictError('slot_taken', 'המועד נתפס ברגע זה. אנא בחרו מועד אחר.');
 
+    try {
+      await this.notifications.notifyBookingConfirmed(customerUserId, {
+        professionalName: snapshot.professionalName, serviceName: snapshot.serviceName, date: body.date, start: body.start,
+      });
+    } catch { /* notifications are best-effort */ }
+
     return {
       id: created.id, professionalId: body.professionalId, professionalName: snapshot.professionalName,
       serviceName: snapshot.serviceName, date: body.date, start: body.start, end: minutesToHHmm(endMin),
@@ -47,5 +55,10 @@ export class BookingService {
     if (owned === null) throw new NotFoundError('booking_not_found', 'ההזמנה לא נמצאה.');
     if (!canCancel(owned.status)) throw new ConflictError('cannot_cancel', 'לא ניתן לבטל הזמנה זו.');
     await this.repo.cancel(bookingId);
+    try {
+      await this.notifications.notifyBookingCancelled(customerUserId, {
+        professionalName: owned.professionalName, serviceName: owned.serviceName, date: owned.date, start: owned.start,
+      });
+    } catch { /* notifications are best-effort */ }
   }
 }
