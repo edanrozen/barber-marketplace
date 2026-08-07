@@ -36,6 +36,9 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       <View style={styles.header}>
         <Text style={styles.title}>{t('discovery.title')}</Text>
         <View style={styles.headerLinks}>
+          <TouchableOpacity onPress={() => navigation.navigate('Notifications')} accessibilityRole="button">
+            <Text style={styles.link}>{t('home.notifications')}</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('MyBookings')} accessibilityRole="button">
             <Text style={styles.link}>{t('home.myBookings')}</Text>
           </TouchableOpacity>

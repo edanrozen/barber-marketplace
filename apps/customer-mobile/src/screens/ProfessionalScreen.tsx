@@ -11,7 +11,7 @@ import { t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Professional'>;
 
-export function ProfessionalScreen({ route }: Props): React.JSX.Element {
+export function ProfessionalScreen({ route, navigation }: Props): React.JSX.Element {
   const { id } = route.params;
   const [pro, setPro] = useState<ProfessionalDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,10 +57,8 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
   }
   async function doBook(serviceId: string, date: string, start: string): Promise<void> {
     try {
-      await createBooking({ professionalId: id, serviceId, date, start });
-      Alert.alert(t('booking.success'));
-      setAvailLoading(true);
-      setAvailability(await getAvailability(id, serviceId));
+      const created = await createBooking({ professionalId: id, serviceId, date, start });
+      navigation.navigate('BookingConfirmation', { booking: created });
     } catch (e) {
       Alert.alert(e instanceof Error ? e.message : t('common.error'));
     } finally {

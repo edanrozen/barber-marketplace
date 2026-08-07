@@ -48,4 +48,10 @@ export const he = {
   'booking.statusConfirmed': 'מאושר',
   'booking.statusCancelled': 'בוטל',
   'booking.statusCompleted': 'הושלם',
+  'home.notifications': 'התראות',
+  'confirm.title': 'התור אושר!',
+  'confirm.viewBookings': 'ההזמנות שלי',
+  'confirm.backHome': 'חזרה לדף הבית',
+  'notif.title': 'התראות',
+  'notif.empty': 'אין התראות חדשות',
 } as const;
