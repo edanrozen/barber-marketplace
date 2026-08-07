@@ -14,5 +14,6 @@ import { PgAvailabilityRepository } from './infrastructure/pg-availability.repos
     AvailabilityService,
     { provide: AVAILABILITY_REPOSITORY, useFactory: (pool: Pool) => new PgAvailabilityRepository(pool), inject: [PG_POOL] },
   ],
+  exports: [AvailabilityService],
 })
 export class AvailabilityModule {}

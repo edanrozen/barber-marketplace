@@ -22,4 +22,12 @@ export class PgAvailabilityRepository implements AvailabilityRepository {
     );
     return (r.rows as HourRow[]).map((x) => ({ weekday: x.weekday, startMinutes: x.start_minute, endMinutes: x.end_minute }));
   }
+
+  async getBookedStartMinutes(professionalProfileId: string, dateStr: string): Promise<readonly number[]> {
+    const r = await this.pool.query(
+      "SELECT start_minute FROM bookings WHERE professional_profile_id = $1 AND scheduled_date = $2 AND status = 'confirmed'",
+      [professionalProfileId, dateStr],
+    );
+    return (r.rows as { start_minute: number }[]).map((x) => x.start_minute);
+  }
 }
