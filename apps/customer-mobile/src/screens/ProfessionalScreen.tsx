@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ProfessionalDetail } from '@barber-marketplace/api-contracts';
-import { formatCurrencyILS } from '@barber-marketplace/i18n';
+import type { AvailabilityResponse, ProfessionalDetail } from '@barber-marketplace/api-contracts';
+import { formatCurrencyILS, formatDateIL } from '@barber-marketplace/i18n';
 import type { RootStackParamList } from '../navigation/RootNavigator';
-import { getProfessional } from '../api/professionals-api';
+import { getAvailability, getProfessional } from '../api/professionals-api';
 import { theme } from '../theme';
 import { t } from '../i18n';
 
@@ -15,6 +15,9 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
   const [pro, setPro] = useState<ProfessionalDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [availability, setAvailability] = useState<AvailabilityResponse | null>(null);
+  const [availLoading, setAvailLoading] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -27,6 +30,21 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
       }
     })();
   }, [id]);
+
+  useEffect(() => {
+    if (selectedServiceId === null) return;
+    setAvailLoading(true);
+    setAvailability(null);
+    void (async () => {
+      try {
+        setAvailability(await getAvailability(id, selectedServiceId));
+      } catch {
+        setAvailability(null);
+      } finally {
+        setAvailLoading(false);
+      }
+    })();
+  }, [id, selectedServiceId]);
 
   if (loading) return <View style={[styles.container, styles.center]}><ActivityIndicator color={theme.colors.primary} /></View>;
   if (error !== null || pro === null) return <View style={[styles.container, styles.center]}><Text style={styles.error}>{error ?? t('common.error')}</Text></View>;
@@ -62,27 +80,46 @@ export function ProfessionalScreen({ route }: Props): React.JSX.Element {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('pro.services')}</Text>
-        {pro.services.map((s) => (
-          <View key={s.id} style={styles.serviceRow}>
-            <View style={styles.serviceInfo}>
-              <Text style={styles.serviceName}>{s.name}</Text>
-              <Text style={styles.serviceDur}>{`${s.durationMinutes} ${t('common.minutesShort')}`}</Text>
-            </View>
-            <Text style={styles.servicePrice}>{formatCurrencyILS(s.priceMinorUnits)}</Text>
-          </View>
-        ))}
+        {pro.services.map((s) => {
+          const selected = s.id === selectedServiceId;
+          return (
+            <TouchableOpacity key={s.id} style={[styles.serviceRow, selected && styles.serviceRowSelected]} onPress={() => setSelectedServiceId(s.id)} accessibilityRole="button">
+              <View style={styles.serviceInfo}>
+                <Text style={styles.serviceName}>{s.name}</Text>
+                <Text style={styles.serviceDur}>{`${s.durationMinutes} ${t('common.minutesShort')}`}</Text>
+              </View>
+              <Text style={styles.servicePrice}>{formatCurrencyILS(s.priceMinorUnits)}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('pro.travelArea')}</Text>
-        <Text style={styles.meta}>{`${pro.travelArea.zoneName}  \u00b7  ${t('pro.radius')}: ${(pro.travelArea.radiusMeters / 1000).toFixed(1)} \u05e7"\u05de`}</Text>
-        {eta !== '' && <Text style={styles.meta}>{`${t('pro.eta')}: ${eta}`}</Text>}
-        {pro.availabilitySummary !== null && <Text style={styles.meta}>{`${t('pro.availability')}: ${pro.availabilitySummary}`}</Text>}
+        <Text style={styles.sectionTitle}>{t('avail.title')}</Text>
+        {selectedServiceId === null ? (
+          <Text style={styles.meta}>{t('avail.pickService')}</Text>
+        ) : availLoading ? (
+          <ActivityIndicator color={theme.colors.primary} />
+        ) : availability === null || availability.days.length === 0 ? (
+          <Text style={styles.meta}>{t('avail.noSlots')}</Text>
+        ) : (
+          availability.days.map((day) => {
+            const [y, mo, d] = day.date.split('-').map(Number);
+            return (
+              <View key={day.date} style={styles.dayBlock}>
+                <Text style={styles.dayLabel}>{formatDateIL(new Date(y ?? 2000, (mo ?? 1) - 1, d ?? 1))}</Text>
+                <View style={styles.slotWrap}>
+                  {day.slots.map((slot) => (
+                    <TouchableOpacity key={slot.start} style={styles.slot} onPress={() => Alert.alert(t('pro.bookingSoon'))} accessibilityRole="button">
+                      <Text style={styles.slotText}>{slot.start}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            );
+          })
+        )}
       </View>
-
-      <TouchableOpacity style={styles.book} onPress={() => Alert.alert(t('pro.bookingSoon'))} accessibilityRole="button">
-        <Text style={styles.bookText}>{t('pro.bookCta')}</Text>
-      </TouchableOpacity>
       <View style={styles.footerSpace} />
     </ScrollView>
   );
@@ -102,13 +139,17 @@ const styles = StyleSheet.create({
   sectionTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '700', marginBottom: theme.spacing(1), textAlign: 'right' },
   gallery: { gap: theme.spacing(1) },
   portfolio: { width: 130, height: 130, borderRadius: 12, backgroundColor: theme.colors.border },
-  serviceRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingVertical: theme.spacing(1), borderBottomColor: theme.colors.border, borderBottomWidth: 1 },
+  serviceRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingVertical: theme.spacing(1), paddingHorizontal: theme.spacing(1), borderRadius: 10, borderBottomColor: theme.colors.border, borderBottomWidth: 1 },
+  serviceRowSelected: { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.primary },
   serviceInfo: { alignItems: 'flex-end' },
   serviceName: { color: theme.colors.text, fontSize: 16 },
   serviceDur: { color: theme.colors.muted, fontSize: 13, marginTop: 2 },
   servicePrice: { color: theme.colors.primary, fontSize: 16, fontWeight: '700' },
   meta: { color: theme.colors.muted, fontSize: 14, textAlign: 'right', marginTop: 2 },
-  book: { backgroundColor: theme.colors.primary, borderRadius: theme.radius, padding: theme.spacing(2), alignItems: 'center', margin: theme.spacing(2) },
-  bookText: { color: theme.colors.bg, fontSize: 18, fontWeight: '700' },
+  dayBlock: { marginTop: theme.spacing(1.5) },
+  dayLabel: { color: theme.colors.text, fontSize: 15, fontWeight: '600', textAlign: 'right', marginBottom: theme.spacing(0.5) },
+  slotWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: theme.spacing(1) },
+  slot: { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: 10, paddingVertical: theme.spacing(0.75), paddingHorizontal: theme.spacing(1.5) },
+  slotText: { color: theme.colors.primary, fontSize: 15, fontWeight: '600' },
   footerSpace: { height: theme.spacing(4) },
 });

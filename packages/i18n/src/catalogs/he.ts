@@ -33,4 +33,7 @@ export const he = {
   'pro.eta': 'זמן הגעה משוער',
   'pro.bookCta': 'קביעת תור',
   'pro.bookingSoon': 'הזמנת תורים תיפתח בקרוב',
+  'avail.title': 'בחרו מועד',
+  'avail.pickService': 'בחרו שירות כדי לראות זמינות',
+  'avail.noSlots': 'אין תורים פנויים בימים הקרובים',
 } as const;
