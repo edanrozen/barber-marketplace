@@ -35,9 +35,17 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('discovery.title')}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')} accessibilityRole="button">
-          <Text style={styles.link}>{t('home.profileCta')}</Text>
-        </TouchableOpacity>
+        <View style={styles.headerLinks}>
+          <TouchableOpacity onPress={() => navigation.navigate('Notifications')} accessibilityRole="button">
+            <Text style={styles.link}>{t('home.notifications')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('MyBookings')} accessibilityRole="button">
+            <Text style={styles.link}>{t('home.myBookings')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')} accessibilityRole="button">
+            <Text style={styles.link}>{t('home.profileCta')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -88,6 +96,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: theme.spacing(2) },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
   link: { color: theme.colors.primary, fontSize: 15 },
+  headerLinks: { flexDirection: 'row-reverse', gap: theme.spacing(2) },
   center: { marginTop: theme.spacing(6) },
   error: { color: theme.colors.danger, textAlign: 'center', marginTop: theme.spacing(4) },
   empty: { color: theme.colors.muted, textAlign: 'center', marginTop: theme.spacing(6) },

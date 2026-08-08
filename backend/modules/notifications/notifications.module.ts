@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
+import { type Pool } from 'pg';
+import { IdentityModule, PG_POOL } from '../identity';
+import { NotificationsService } from './application/notifications.service';
+import { NotificationsController } from './http/notifications.controller';
+import { NOTIFICATION_REPOSITORY } from './ports/ports';
+import { PgNotificationRepository } from './infrastructure/pg-notification.repository';
 
-/**
- * Notifications bounded context.
- *
- * This is an EMPTY module scaffold (Sprint 1, T1.1.2). Providers, controllers,
- * and internal logic are added in later sprints per this module's TDD.
- *
- * Boundary rule (Engineering Constitution): other modules access Notifications only
- * through published contracts in packages/*, never by importing internals.
- */
-@Module({})
+/** In-app notifications feed. Written by domain events (e.g. booking confirmed/cancelled). */
+@Module({
+  imports: [IdentityModule],
+  controllers: [NotificationsController],
+  providers: [
+    NotificationsService,
+    { provide: NOTIFICATION_REPOSITORY, useFactory: (pool: Pool) => new PgNotificationRepository(pool), inject: [PG_POOL] },
+  ],
+  exports: [NotificationsService],
+})
 export class NotificationsModule {}

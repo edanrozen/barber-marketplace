@@ -6,3 +6,10 @@ export const listProfessionals = (cursor?: string): Promise<Page<ProfessionalSum
 
 export const getProfessional = (id: string): Promise<ProfessionalDetail> =>
   apiRequest<ProfessionalDetail>(`professionals/${id}`, { method: 'GET', auth: true });
+
+import type { AvailabilityResponse } from '@barber-marketplace/api-contracts';
+export const getAvailability = (professionalId: string, serviceId: string, days = 7): Promise<AvailabilityResponse> =>
+  apiRequest<AvailabilityResponse>(
+    `professionals/${professionalId}/availability?serviceId=${encodeURIComponent(serviceId)}&days=${days}`,
+    { method: 'GET', auth: true },
+  );

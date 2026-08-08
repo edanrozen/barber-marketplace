@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { BookingView } from '@barber-marketplace/api-contracts';
 import { useAuth } from '../auth/auth-context';
 import { SplashScreen } from '../screens/SplashScreen';
 import { PhoneEntryScreen } from '../screens/PhoneEntryScreen';
@@ -7,6 +8,9 @@ import { OtpEntryScreen } from '../screens/OtpEntryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ProfessionalScreen } from '../screens/ProfessionalScreen';
+import { MyBookingsScreen } from '../screens/MyBookingsScreen';
+import { BookingConfirmationScreen } from '../screens/BookingConfirmationScreen';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -15,6 +19,9 @@ export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
   Professional: { id: string };
+  MyBookings: undefined;
+  BookingConfirmation: { booking: BookingView };
+  Notifications: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,6 +44,9 @@ export function RootNavigator(): React.JSX.Element {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Professional" component={ProfessionalScreen} />
+          <Stack.Screen name="MyBookings" component={MyBookingsScreen} />
+          <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
         </Stack.Group>
       ) : (
         <Stack.Group>

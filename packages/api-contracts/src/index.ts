@@ -11,3 +11,7 @@ export * from './error-response';
 export * from './auth';
 export * from './profile';
 export * from './professional';
+export * from './availability';
+export * from './booking';
+export * from './notification';
+export * from './payment';

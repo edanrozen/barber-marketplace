@@ -1,1 +1,2 @@
-export * from './notifications.module';
+export { NotificationsModule } from './notifications.module';
+export { NotificationsService } from './application/notifications.service';

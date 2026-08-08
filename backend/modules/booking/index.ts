@@ -1,1 +1,1 @@
-export * from './booking.module';
+export { BookingModule } from './booking.module';
