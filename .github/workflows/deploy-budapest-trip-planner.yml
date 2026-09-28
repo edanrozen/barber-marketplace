@@ -42,7 +42,17 @@ jobs:
       # needed since this app uses BrowserRouter with a plain basename.
       - name: SPA fallback for deep-link refresh
         run: cp dist/index.html dist/404.html
+      # `enablement: true` is the critical part: without it this action only
+      # READS the Pages config and leaves it alone. This repo's Pages site
+      # was already configured as "Deploy from a branch" (legacy/Jekyll,
+      # serving the repo root — which has no index.html, so GitHub falls
+      # back to rendering README.md, exactly what we saw live). That legacy
+      # pipeline auto-rebuilds on every push regardless of this workflow, and
+      # a successful `deploy-pages` call earlier never actually overrides it
+      # unless the site's build_type is switched to "workflow" first.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: budapest-trip-planner/dist
