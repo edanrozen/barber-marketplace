@@ -9,6 +9,15 @@ export interface WeatherSnapshot {
 }
 
 /**
+ * Which tier `currentLocation` actually came from — drives the small
+ * "📍 ..." status line, never a blocking indicator. 'live' = fresh GPS
+ * fix just now; 'last-known' = an earlier GPS fix, reused because a fresh
+ * one wasn't available; 'fallback' = the coordinates of whatever's on the
+ * schedule right now (no GPS at all); 'none' = no location info at all.
+ */
+export type LocationSource = 'live' | 'last-known' | 'fallback' | 'none';
+
+/**
  * Live snapshot of "where the humans are right now". This is the context the
  * recommendation engine reads on every call — it is never persisted as a
  * point-in-time log, only the current values.
@@ -17,6 +26,7 @@ export interface UserState {
   currentLocation: GeoCoordinates | null;
   /** Free-text fallback when GPS isn't available/trusted (e.g. "Buda Castle"). */
   currentLocationLabel: string | null;
+  locationSource: LocationSource;
 
   hungerLevel: Level0to3;
   thirstLevel: Level0to3;
@@ -32,6 +42,7 @@ export interface UserState {
 export const DEFAULT_USER_STATE: UserState = {
   currentLocation: null,
   currentLocationLabel: null,
+  locationSource: 'none',
   hungerLevel: 1,
   thirstLevel: 1,
   energyLevel: 3,

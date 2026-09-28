@@ -95,6 +95,12 @@ export function findCurrentItem(day: TripDay, nowMinutes: number, places: Place[
   );
 }
 
+/** Same as findCurrentItem, but only a FIXED item counts — being "in" a flexible block (e.g. a named-but-open sightseeing window) never blocks a spontaneous recommendation the way an ongoing locked commitment does. */
+export function findCurrentFixedItem(day: TripDay, nowMinutes: number, places: Place[]): ScheduleItem | null {
+  const current = findCurrentItem(day, nowMinutes, places);
+  return current?.fixed ? current : null;
+}
+
 export interface FreeTimeBlock {
   id: string;
   /** The raw gap between the two bounding items — what the timeline displays ("12:00–17:00, 5 hours free"). */

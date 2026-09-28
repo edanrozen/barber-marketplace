@@ -10,16 +10,16 @@ export interface MoodOption {
 
 /** Home-screen grid, in display order. Mirrors the brief 1:1. */
 export const MOOD_OPTIONS: MoodOption[] = [
-  { id: 'hungry_light', emoji: '🍔', label: 'רעב קצת', categories: ['food', 'cafe'] },
-  { id: 'hungry_a_lot', emoji: '🍕', label: 'רעב ממש', categories: ['food'] },
-  { id: 'drink', emoji: '🍸', label: 'רוצה לשתות', categories: ['bar'] },
-  { id: 'party', emoji: '🎉', label: 'רוצה מסיבה', categories: ['club', 'bar', 'casino'] },
-  { id: 'adrenaline', emoji: '🏎️', label: 'רוצה אדרנלין', categories: ['adrenaline'] },
-  { id: 'sightseeing', emoji: '🏛️', label: 'רוצה לטייל', categories: ['attraction'] },
-  { id: 'shopping', emoji: '🛍️', label: 'רוצה שופינג', categories: ['shopping'] },
-  { id: 'coffee_sweet', emoji: '☕', label: 'רוצה קפה / מתוק', categories: ['cafe'] },
-  { id: 'chill', emoji: '😴', label: 'רוצה משהו רגוע', categories: ['attraction', 'cafe', 'water'] },
-  { id: 'surprise_me', emoji: '🎲', label: 'תפתיע אותי', categories: [] },
+  { id: 'hungry_light', emoji: '🍔', label: 'רעבים קצת', categories: ['food', 'cafe'] },
+  { id: 'hungry_a_lot', emoji: '🍕', label: 'רעבים ממש', categories: ['food'] },
+  { id: 'drink', emoji: '🍸', label: 'בא לנו לשתות', categories: ['bar'] },
+  { id: 'party', emoji: '🎉', label: 'בא לנו מסיבה', categories: ['club', 'bar', 'casino'] },
+  { id: 'adrenaline', emoji: '🏎️', label: 'בא לנו אדרנלין', categories: ['adrenaline'] },
+  { id: 'sightseeing', emoji: '🏛️', label: 'בא לנו לטייל', categories: ['attraction'] },
+  { id: 'shopping', emoji: '🛍️', label: 'בא לנו שופינג', categories: ['shopping'] },
+  { id: 'coffee_sweet', emoji: '☕', label: 'קפה / מתוק', categories: ['cafe'] },
+  { id: 'chill', emoji: '😴', label: 'משהו רגוע', categories: ['attraction', 'cafe', 'water'] },
+  { id: 'surprise_me', emoji: '🎲', label: 'תפתיע אותנו', categories: [] },
 ];
 
 export function moodOption(id: string | null): MoodOption | undefined {

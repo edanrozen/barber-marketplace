@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, LocateFixed, Minus, Plus } from 'lucide-react';
 import clsx from 'clsx';
 import { useUserStateStore } from '@/store';
+import { getCurrentLocation } from '@/lib/geolocation';
+import { LocationStatus } from '@/components/home/LocationStatus';
 import type { Level0to3, PriceLevel } from '@/types';
 
 const LEVEL_ITEMS: { value: Level0to3; label: string }[] = [
@@ -64,20 +66,20 @@ export function UserStatePage(): JSX.Element {
   const state = useUserStateStore((s) => s);
   const [locating, setLocating] = useState(false);
 
-  function useMyLocation(): void {
-    if (!navigator.geolocation) return;
+  async function useMyLocation(): Promise<void> {
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        state.set({
-          currentLocation: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          currentLocationLabel: null,
-        });
-        setLocating(false);
-      },
-      () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 10_000 },
-    );
+    try {
+      const pos = await getCurrentLocation();
+      state.set({
+        currentLocation: { lat: pos.latitude, lng: pos.longitude },
+        currentLocationLabel: null,
+        locationSource: 'live',
+      });
+    } catch {
+      // Permission denied or unsupported — leave whatever location (if any) we already had.
+    } finally {
+      setLocating(false);
+    }
   }
 
   return (
@@ -141,11 +143,9 @@ export function UserStatePage(): JSX.Element {
             <LocateFixed size={16} />
             {locating ? 'מאתר מיקום...' : state.currentLocation ? 'עדכן מיקום נוכחי' : 'השתמשו במיקום שלי'}
           </button>
-          {state.currentLocation && (
-            <p className="text-center text-xs text-ink-muted">
-              {state.currentLocation.lat.toFixed(4)}, {state.currentLocation.lng.toFixed(4)}
-            </p>
-          )}
+          <div className="flex justify-center">
+            <LocationStatus source={state.locationSource} />
+          </div>
         </Field>
       </div>
     </div>

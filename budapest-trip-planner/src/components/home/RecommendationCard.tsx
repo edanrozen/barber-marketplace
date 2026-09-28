@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, MapPin, RefreshCcw, Navigation } from 'lucide-react';
+import { Clock, MapPin, RefreshCcw, Navigation, ChevronDown, ThumbsDown, CircleCheck, ShieldAlert } from 'lucide-react';
+import clsx from 'clsx';
 import type { ScoredPlace } from '@/types';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
 import { formatDistance } from '@/lib/distance';
@@ -8,8 +10,14 @@ import { formatDuration } from '@/lib/time';
 interface RecommendationCardProps {
   scored: ScoredPlace;
   explanation: string | null;
+  reasons: string[];
+  hoursCaveat: string | null;
+  onGo: () => void;
   onAnotherOption: () => void;
+  onDismiss: () => void;
+  onMarkDone: () => void;
   hasMoreAlternatives: boolean;
+  justMarkedDone: boolean;
 }
 
 function mapsUrl(scored: ScoredPlace): string {
@@ -25,10 +33,17 @@ function mapsUrl(scored: ScoredPlace): string {
 export function RecommendationCard({
   scored,
   explanation,
+  reasons,
+  hoursCaveat,
+  onGo,
   onAnotherOption,
+  onDismiss,
+  onMarkDone,
   hasMoreAlternatives,
+  justMarkedDone,
 }: RecommendationCardProps): JSX.Element {
   const { place } = scored;
+  const [showWhy, setShowWhy] = useState(false);
 
   return (
     <motion.div
@@ -45,7 +60,7 @@ export function RecommendationCard({
           </div>
         )}
         <span className="absolute right-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-accent-gold">
-          🎯 הבחירה שלי בשבילכם
+          🎯 הבחירה שלנו
         </span>
       </div>
 
@@ -65,6 +80,13 @@ export function RecommendationCard({
           </p>
         )}
 
+        {place.category === 'casino' && (
+          <p className="flex items-start gap-2 rounded-lg bg-accent-rose/10 p-3 text-sm leading-relaxed text-accent-rose">
+            <ShieldAlert size={16} className="mt-0.5 shrink-0" />
+            <span>🎰 תקציב מוגדר מראש — וזהו.</span>
+          </p>
+        )}
+
         <div className="flex flex-wrap gap-3 text-xs text-ink-secondary">
           {scored.distanceKm !== null && (
             <span className="flex items-center gap-1">
@@ -81,14 +103,37 @@ export function RecommendationCard({
           </span>
         </div>
 
+        {hoursCaveat && <p className="text-xs text-ink-muted">⏱ {hoursCaveat}</p>}
+
+        {reasons.length > 0 && (
+          <div className="rounded-lg border border-base-border">
+            <button
+              type="button"
+              onClick={() => setShowWhy((v) => !v)}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-ink-secondary"
+            >
+              <span>למה דווקא זה?</span>
+              <ChevronDown size={16} className={clsx('transition-transform', showWhy && 'rotate-180')} />
+            </button>
+            {showWhy && (
+              <ul className="flex flex-col gap-1 px-3 pb-3 text-xs text-ink-secondary">
+                {reasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-2 pt-1">
           <a
             href={mapsUrl(scored)}
             target="_blank"
             rel="noreferrer"
+            onClick={onGo}
             className="flex-1 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
           >
-            יאללה לשם 🚶
+            יאללה לשם 🚀
           </a>
           {hasMoreAlternatives && (
             <button
@@ -100,6 +145,31 @@ export function RecommendationCard({
               אופציה אחרת
             </button>
           )}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-base-border py-2 text-xs font-medium text-ink-muted transition-colors hover:border-accent-rose/40 hover:text-accent-rose"
+          >
+            <ThumbsDown size={13} />
+            לא בא לנו
+          </button>
+          <button
+            type="button"
+            onClick={onMarkDone}
+            disabled={justMarkedDone}
+            className={clsx(
+              'flex flex-1 items-center justify-center gap-1.5 rounded-full border py-2 text-xs font-medium transition-colors',
+              justMarkedDone
+                ? 'border-accent-teal/40 text-accent-teal'
+                : 'border-base-border text-ink-muted hover:border-accent-teal/40 hover:text-accent-teal',
+            )}
+          >
+            <CircleCheck size={13} />
+            {justMarkedDone ? 'נרשם ✓' : 'עשינו את זה ✓'}
+          </button>
         </div>
       </div>
     </motion.div>

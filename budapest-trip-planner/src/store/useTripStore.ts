@@ -48,6 +48,8 @@ interface TripState {
   currentDay: () => TripDay | undefined;
   /** The TripDay whose date matches `now`'s calendar date, if the plan has one — used for live "what's happening right now" queries, independent of whichever day the Today page tabs are browsing. */
   todaysTripDay: (now: Date) => TripDay | undefined;
+  /** The TripDay exactly one calendar day before `day`, if the plan has one — used to notice an overnight energy carryover from the previous night. */
+  dayBefore: (day: TripDay) => TripDay | undefined;
   setCurrentDayIndex: (index: number) => void;
   addScheduleItem: (
     dayId: string,
@@ -86,6 +88,12 @@ export const useTripStore = create<TripState>()(
         }
 
         return todayDay;
+      },
+
+      dayBefore: (day) => {
+        const prev = new Date(`${day.date}T00:00:00`);
+        prev.setDate(prev.getDate() - 1);
+        return get().plan.days.find((d) => d.date === dateKey(prev));
       },
 
       setCurrentDayIndex: (index) => set({ currentDayIndex: index }),

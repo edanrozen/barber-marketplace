@@ -6,6 +6,7 @@ import { usePlacesStore, useTripStore, useUserStateStore } from '@/store';
 import { DayTimeline } from '@/components/trip/DayTimeline';
 import { ScheduleHeader } from '@/components/trip/ScheduleHeader';
 import { ConflictWarnings } from '@/components/trip/ConflictWarnings';
+import { TripProgress } from '@/components/trip/TripProgress';
 import { getNextFixedActivity, detectScheduleConflicts, buildRecommendationContext } from '@/engine/recommendationEngine';
 import { getCurrentTime } from '@/lib/time';
 import type { ScheduleItem } from '@/types';
@@ -96,6 +97,7 @@ export function TodayPage(): JSX.Element {
 
       {day && <ScheduleHeader availableMinutes={availableMinutes} nextActivity={nextActivity} />}
       <ConflictWarnings conflicts={conflicts} />
+      {day && <TripProgress day={day} places={places} />}
 
       {day && (
         <DayTimeline day={day} places={places} onEditItem={handleEditItem} onTapFreeTime={() => navigate('/')} />

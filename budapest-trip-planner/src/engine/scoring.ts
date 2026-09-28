@@ -16,9 +16,24 @@ function moodMatchFactor(place: Place, ctx: RecommendationContext): ScoreFactor 
 
 function needFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
-  let points = maxPoints * 0.5;
 
-  if (place.category === 'food' || place.category === 'cafe') {
+  // A place's CATEGORY is the usual signal, but an explicit moodTag (e.g. a
+  // shopping district that's really a bar-crawl strip, tagged 'drink') is
+  // the more specific one — see filters.ts's `passesMood`, which already
+  // treats moodTags as equally valid grounds to qualify. Scoring must agree:
+  // otherwise a place that only qualifies via category default (0.5) can
+  // outscore a real bar/restaurant whenever hunger/thirst sits below the
+  // formula's midpoint, which is backwards for a mood the user just picked.
+  const isFoodLike =
+    place.category === 'food' ||
+    place.category === 'cafe' ||
+    place.moodTags.includes('hungry_light') ||
+    place.moodTags.includes('hungry_a_lot') ||
+    place.moodTags.includes('coffee_sweet');
+  const isDrinkLike = place.category === 'bar' || place.category === 'club' || place.moodTags.includes('drink');
+
+  let points = maxPoints * 0.5;
+  if (isFoodLike) {
     // When we know exactly how hungry this place is meant for (a dessert
     // stop vs. an all-you-can-eat dinner), score the gap directly instead
     // of treating every food/cafe place as interchangeable.
@@ -26,7 +41,7 @@ function needFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
       place.hungerFit !== undefined
         ? maxPoints * clamp(1 - Math.abs(place.hungerFit - ctx.hungerLevel) / 3, 0, 1)
         : maxPoints * (ctx.hungerLevel / 3);
-  } else if (place.category === 'bar' || place.category === 'club') {
+  } else if (isDrinkLike) {
     points = maxPoints * (ctx.thirstLevel / 3);
   }
   return { key: 'need', label: 'התאמה לרעב/צמא', points, maxPoints };
@@ -100,6 +115,13 @@ function bookingFactor(place: Place): ScoreFactor {
   return { key: 'booking', label: 'לא דורש הזמנה מראש', points: place.requiresBooking ? 0 : maxPoints, maxPoints };
 }
 
+/** "לא בא לנו" softly, temporarily penalizes — it's a mood signal from a few minutes ago, not a permanent verdict on the place. */
+function dismissalFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
+  const maxPoints = 8;
+  const dismissedRecently = ctx.recentDismissals.includes(place.id);
+  return { key: 'dismissal', label: 'לא נדחה לאחרונה', points: dismissedRecently ? 0 : maxPoints, maxPoints };
+}
+
 export function scorePlace(place: Place, ctx: RecommendationContext): ScoredPlace {
   const { distanceKm, travelMinutes } = travelInfoFor(place, ctx);
 
@@ -114,6 +136,7 @@ export function scorePlace(place: Place, ctx: RecommendationContext): ScoredPlac
     weatherFitFactor(place, ctx),
     freshnessFactor(place, ctx),
     bookingFactor(place),
+    dismissalFactor(place, ctx),
   ];
 
   const score = factors.reduce((sum, f) => sum + f.points, 0);

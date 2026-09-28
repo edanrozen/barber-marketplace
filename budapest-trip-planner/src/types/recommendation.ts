@@ -30,8 +30,10 @@ export interface RecommendationContext {
   currentTime: Date;
   currentLocation: GeoCoordinates | null;
   currentDay: TripDay | null;
+  /** The FIXED item actively happening right now, if any — being in the middle of it means "not available for something else" even when the next fixed commitment is hours away. A flexible block never counts here. */
+  currentActivity: ScheduleItem | null;
 
-  /** Minutes free right now before the next fixed commitment, already buffer-trimmed. null = nothing fixed left today (unconstrained). */
+  /** Minutes free right now before the next fixed commitment, already buffer-trimmed. null = nothing fixed left today (unconstrained). Forced to 0 whenever `currentActivity` is set. */
   availableMinutes: number | null;
   /** Absolute minutes-since-midnight by which any spontaneous activity must be finished. null = unconstrained. */
   latestFinishTimeMinutes: number | null;
@@ -52,6 +54,8 @@ export interface RecommendationContext {
 
   /** Place ids to skip this pass — backs "give me another option". */
   excludeIds: string[];
+  /** Place ids "לא בא לנו"-dismissed recently — softly penalized, never hard-excluded and never permanent. */
+  recentDismissals: string[];
 }
 
 export interface RecommendationResult {
