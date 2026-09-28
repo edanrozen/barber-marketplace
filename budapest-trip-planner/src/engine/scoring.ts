@@ -122,6 +122,20 @@ function dismissalFactor(place: Place, ctx: RecommendationContext): ScoreFactor 
   return { key: 'dismissal', label: 'לא נדחה לאחרונה', points: dismissedRecently ? 0 : maxPoints, maxPoints };
 }
 
+/**
+ * A Google rating is metadata, not a verdict — this factor's `maxPoints` is
+ * deliberately small relative to the others (mood alone is 20) so a great
+ * rating can nudge the order but never outweigh actual fit (distance, time,
+ * hunger). No rating on file scores the same neutral default as an unrated
+ * priceLevel/weather does elsewhere in this file.
+ */
+function ratingFactor(place: Place): ScoreFactor {
+  const maxPoints = 5;
+  if (place.rating === undefined) return { key: 'rating', label: 'דירוג גוגל', points: maxPoints * 0.7, maxPoints };
+  const points = maxPoints * clamp((place.rating - 3.5) / 1.5, 0, 1);
+  return { key: 'rating', label: 'דירוג גוגל', points, maxPoints };
+}
+
 export function scorePlace(place: Place, ctx: RecommendationContext): ScoredPlace {
   const { distanceKm, travelMinutes } = travelInfoFor(place, ctx);
 
@@ -137,6 +151,7 @@ export function scorePlace(place: Place, ctx: RecommendationContext): ScoredPlac
     freshnessFactor(place, ctx),
     bookingFactor(place),
     dismissalFactor(place, ctx),
+    ratingFactor(place),
   ];
 
   const score = factors.reduce((sum, f) => sum + f.points, 0);
