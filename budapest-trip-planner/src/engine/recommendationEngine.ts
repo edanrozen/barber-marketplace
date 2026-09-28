@@ -1,17 +1,28 @@
-import type { Place, RecommendationResult } from '@/types';
+import type { Place, RecommendationContext, RecommendationResult } from '@/types';
 import { filterCandidates } from './filters';
 import { scorePlace } from './scoring';
 import { buildExplanation } from './explain';
-import type { EngineContext } from './types';
 
 const MAX_ALTERNATIVES = 3;
 
 /**
- * The whole point of the app: given everything we know right now, pick ONE
- * place and say why — not a ranked list of twenty. `alternatives` exists
- * only to back "give me another option" without re-running the engine.
+ * The whole point of the app: given everything we know right now (built by
+ * `buildRecommendationContext`), pick ONE place and say why — not a ranked
+ * list of twenty. `alternatives` exists only to back "give me another
+ * option" without re-running the engine.
+ *
+ * When there's no time left before the next fixed commitment
+ * (`ctx.availableMinutes === 0`), this never returns a pick: `mustLeaveNow`
+ * is true and `best` is null — the UI must tell the user to head out, not
+ * offer something new.
  */
-export function getRecommendation(places: Place[], ctx: EngineContext): RecommendationResult {
+export function getRecommendation(places: Place[], ctx: RecommendationContext): RecommendationResult {
+  const mustLeaveNow = ctx.availableMinutes !== null && ctx.availableMinutes <= 0;
+
+  if (mustLeaveNow) {
+    return { best: null, alternatives: [], explanation: null, mustLeaveNow: true, context: ctx };
+  }
+
   const candidates = filterCandidates(places, ctx);
   const scored = candidates.map((place) => scorePlace(place, ctx)).sort((a, b) => b.score - a.score);
 
@@ -22,13 +33,13 @@ export function getRecommendation(places: Place[], ctx: EngineContext): Recommen
     best,
     alternatives,
     explanation: best ? buildExplanation(best, ctx) : null,
-    context: {
-      nowMinutes: ctx.now.getHours() * 60 + ctx.now.getMinutes(),
-      timeAvailableMinutes: ctx.timeAvailableMinutes,
-      nextActivityTitle: ctx.nextActivityTitle,
-    },
+    mustLeaveNow: false,
+    context: ctx,
   };
 }
 
-export type { EngineContext } from './types';
+export { buildRecommendationContext, getNextFixedActivity } from './context';
+export type { BuildContextInput, NextFixedActivityInfo } from './context';
 export { MOOD_OPTIONS, moodOption } from './moods';
+export { detectScheduleConflicts, computeFreeTimeBlocks } from '@/lib/tripSchedule';
+export type { FreeTimeBlock, ScheduleConflict } from '@/lib/tripSchedule';

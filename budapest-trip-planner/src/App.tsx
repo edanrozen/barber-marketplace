@@ -5,6 +5,7 @@ import { TodayPage } from './pages/TodayPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { PlaceDetailPage } from './pages/PlaceDetailPage';
 import { UserStatePage } from './pages/UserStatePage';
+import { ScheduleItemEditorPage } from './pages/ScheduleItemEditorPage';
 
 export default function App(): JSX.Element {
   return (
@@ -15,6 +16,7 @@ export default function App(): JSX.Element {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/place/:placeId" element={<PlaceDetailPage />} />
         <Route path="/state" element={<UserStatePage />} />
+        <Route path="/schedule" element={<ScheduleItemEditorPage />} />
       </Routes>
     </AppShell>
   );

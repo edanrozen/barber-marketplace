@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, MapPin } from 'lucide-react';
+import { ArrowRight, ExternalLink, MapPin, StickyNote } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
 import { usePlacesStore } from '@/store';
@@ -13,6 +13,8 @@ const STATUS_ACTIONS: { status: PlaceStatus; label: string }[] = [
   { status: 'DONE', label: 'עשינו ✓' },
   { status: 'SKIPPED', label: 'דילגנו' },
   { status: 'NOT_RELEVANT', label: 'לא רלוונטי' },
+  { status: 'NEEDS_VERIFICATION', label: 'טעון אימות' },
+  { status: 'CONFIRMED', label: 'מאושר בלו״ז' },
 ];
 
 export function PlaceDetailPage(): JSX.Element {
@@ -70,12 +72,28 @@ export function PlaceDetailPage(): JSX.Element {
             <h1 className="text-xl font-bold text-ink-primary">{place.name}</h1>
             <StatusBadge status={place.status} />
           </div>
-          <p className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
-            <MapPin size={14} /> {place.location}
-          </p>
+          {place.location && (
+            <p className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
+              <MapPin size={14} /> {place.location}
+            </p>
+          )}
         </div>
 
         {place.description && <p className="text-sm leading-relaxed text-ink-secondary">{place.description}</p>}
+
+        {place.notes && (
+          <p
+            className={clsx(
+              'flex items-start gap-2 rounded-lg p-3 text-sm leading-relaxed',
+              place.status === 'NEEDS_VERIFICATION'
+                ? 'bg-accent-rose/10 text-accent-rose'
+                : 'bg-base-surface2 text-ink-secondary',
+            )}
+          >
+            <StickyNote size={16} className="mt-0.5 shrink-0" />
+            <span>{place.notes}</span>
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 text-xs text-ink-secondary">
           <span className="rounded-full bg-base-surface2 px-2.5 py-1">⏱ {formatDuration(place.estimatedDurationMinutes)}</span>

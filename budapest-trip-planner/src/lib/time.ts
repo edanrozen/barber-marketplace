@@ -2,8 +2,8 @@ import type { OpeningHours, Weekday } from '@/types';
 
 const WEEKDAYS: Weekday[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-/** The trip happens in Budapest; the phone might not be set to that timezone (planning ahead of time from home). Always read the clock via Europe/Budapest. */
-export function getBudapestNow(): Date {
+/** The trip happens in Budapest; the phone might not be set to that timezone (planning ahead of time from home). Always read the clock via Europe/Budapest — this is THE "what time is it" helper the whole app uses. */
+export function getCurrentTime(): Date {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Europe/Budapest',
     year: 'numeric',
@@ -48,6 +48,14 @@ export function minutesToHHMM(totalMinutes: number): string {
 
 export function nowMinutes(date: Date): number {
   return date.getHours() * 60 + date.getMinutes();
+}
+
+/** "YYYY-MM-DD" from a Date's own local fields — never use `toISOString()` here, it UTC-shifts and can land on the wrong day. */
+export function dateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = (date.getMonth() + 1).toString().padStart(2, '0');
+  const d = date.getDate().toString().padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 export function isOpenAt(openingHours: OpeningHours, date: Date): boolean {

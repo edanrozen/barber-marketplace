@@ -1,31 +1,50 @@
-import type { ScheduleItem, TripDay } from '@/types';
-import { sortedSchedule } from '@/lib/tripSchedule';
+import type { Place, ScheduleItem, TripDay } from '@/types';
+import { computeFreeTimeBlocks, type FreeTimeBlock } from '@/engine/recommendationEngine';
+import { sortedItems } from '@/lib/tripSchedule';
+import { parseHHMM } from '@/lib/time';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ScheduleItemRow } from './ScheduleItemRow';
+import { FreeTimeBlockRow } from './FreeTimeBlockRow';
 
 interface DayTimelineProps {
   day: TripDay;
-  onFillFreeTime?: ((item: ScheduleItem) => void) | undefined;
+  places: Place[];
+  onEditItem?: ((item: ScheduleItem) => void) | undefined;
+  onTapFreeTime?: (() => void) | undefined;
 }
 
-export function DayTimeline({ day, onFillFreeTime }: DayTimelineProps): JSX.Element {
-  const items = sortedSchedule(day);
+type TimelineEntry =
+  | { kind: 'item'; sortMinutes: number; item: ScheduleItem }
+  | { kind: 'free'; sortMinutes: number; block: FreeTimeBlock };
 
-  if (items.length === 0) {
+export function DayTimeline({ day, places, onEditItem, onTapFreeTime }: DayTimelineProps): JSX.Element {
+  const items = sortedItems(day).filter((item) => item.status !== 'cancelled' || item.fixed);
+  const freeBlocks = computeFreeTimeBlocks(day, places);
+
+  const entries: TimelineEntry[] = [
+    ...items.map((item): TimelineEntry => ({ kind: 'item', sortMinutes: parseHHMM(item.startTime), item })),
+    ...freeBlocks.map((block): TimelineEntry => ({ kind: 'free', sortMinutes: block.rawStartMinutes, block })),
+  ].sort((a, b) => a.sortMinutes - b.sortMinutes);
+
+  if (entries.length === 0) {
     return (
       <EmptyState
         emoji="📅"
         title="עדיין אין לו״ז ליום הזה"
-        description="כשתזינו את התוכניות והזמנים של היום, הם יופיעו כאן — ובזמנים הפנויים המנוע יוכל להמליץ לכם."
+        description="הוסיפו פעילויות קבועות (טיסה, הזמנה, SPARTY...) והזמן הפנוי ביניהן יחושב אוטומטית."
       />
     );
   }
 
   return (
     <div className="flex flex-col gap-2 px-4">
-      {items.map((item) => (
-        <ScheduleItemRow key={item.id} item={item} onFillFreeTime={onFillFreeTime} />
-      ))}
+      {entries.map((entry) =>
+        entry.kind === 'item' ? (
+          <ScheduleItemRow key={entry.item.id} item={entry.item} onEdit={onEditItem} />
+        ) : (
+          <FreeTimeBlockRow key={entry.block.id} block={entry.block} onTap={() => onTapFreeTime?.()} />
+        ),
+      )}
     </div>
   );
 }

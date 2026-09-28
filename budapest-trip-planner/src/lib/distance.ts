@@ -24,6 +24,23 @@ export function estimateWalkMinutes(distanceKm: number): number {
   return Math.round((distanceKm / AVG_WALK_KMH) * 60);
 }
 
+export interface TravelEstimate {
+  minutes: number;
+  distanceKm: number;
+}
+
+/**
+ * The one place in the app that knows how long it takes to get from A to B.
+ * Today it's straight-line distance + a walking-speed guess; the signature
+ * is deliberately routing-API-shaped (two coordinates in, an ETA out) so a
+ * real provider (Google Maps Directions, etc.) can replace the body later
+ * without touching any caller.
+ */
+export function getTravelTime(from: GeoCoordinates, to: GeoCoordinates): TravelEstimate {
+  const distanceKm = haversineKm(from, to);
+  return { minutes: estimateWalkMinutes(distanceKm), distanceKm };
+}
+
 export function formatDistance(distanceKm: number): string {
   if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} מ׳`;
   return `${distanceKm.toFixed(1)} ק"מ`;

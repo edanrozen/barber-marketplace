@@ -1,12 +1,11 @@
-import type { Place, ScoreFactor, ScoredPlace } from '@/types';
+import type { Place, RecommendationContext, ScoreFactor, ScoredPlace } from '@/types';
 import { travelInfoFor } from './filters';
-import { TIME_BUFFER_MINUTES, type EngineContext } from './types';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function moodMatchFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function moodMatchFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 20;
   if (!ctx.mood || ctx.mood === 'surprise_me') {
     return { key: 'mood', label: 'התאמה למצב', points: maxPoints * 0.6, maxPoints };
@@ -15,15 +14,20 @@ function moodMatchFactor(place: Place, ctx: EngineContext): ScoreFactor {
   return { key: 'mood', label: 'התאמה למצב', points, maxPoints };
 }
 
-function needFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function needFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
-  const { hungerLevel, thirstLevel } = ctx.userState;
   let points = maxPoints * 0.5;
 
   if (place.category === 'food' || place.category === 'cafe') {
-    points = maxPoints * (hungerLevel / 3);
+    // When we know exactly how hungry this place is meant for (a dessert
+    // stop vs. an all-you-can-eat dinner), score the gap directly instead
+    // of treating every food/cafe place as interchangeable.
+    points =
+      place.hungerFit !== undefined
+        ? maxPoints * clamp(1 - Math.abs(place.hungerFit - ctx.hungerLevel) / 3, 0, 1)
+        : maxPoints * (ctx.hungerLevel / 3);
   } else if (place.category === 'bar' || place.category === 'club') {
-    points = maxPoints * (thirstLevel / 3);
+    points = maxPoints * (ctx.thirstLevel / 3);
   }
   return { key: 'need', label: 'התאמה לרעב/צמא', points, maxPoints };
 }
@@ -35,43 +39,47 @@ function distanceFitFactor(travelMinutes: number | null): ScoreFactor {
   return { key: 'distance', label: 'מרחק', points, maxPoints };
 }
 
-function timeFitFactor(place: Place, travelMinutes: number | null, ctx: EngineContext): ScoreFactor {
+/**
+ * `filterCandidates` already guarantees anything reaching scoring fits
+ * within `ctx.availableMinutes` — this factor differentiates HOW
+ * comfortably it fits (half credit for barely making it, full credit for
+ * plenty of margin), rather than a pass/fail check.
+ */
+function timeFitFactor(place: Place, travelMinutes: number | null, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 15;
-  if (ctx.timeAvailableMinutes === null) return { key: 'time', label: 'זמן פנוי', points: maxPoints, maxPoints };
+  if (ctx.availableMinutes === null) return { key: 'time', label: 'זמן פנוי', points: maxPoints, maxPoints };
+  if (ctx.availableMinutes === 0) return { key: 'time', label: 'זמן פנוי', points: 0, maxPoints };
 
-  const travel = travelMinutes ?? 0;
-  const needed = travel * 2 + place.estimatedDurationMinutes + TIME_BUFFER_MINUTES;
-  if (needed <= ctx.timeAvailableMinutes) return { key: 'time', label: 'זמן פנוי', points: maxPoints, maxPoints };
-
-  const ratio = ctx.timeAvailableMinutes / needed;
-  return { key: 'time', label: 'זמן פנוי', points: maxPoints * clamp(ratio, 0, 1), maxPoints };
+  const needed = (travelMinutes ?? 0) + place.estimatedDurationMinutes;
+  const margin = clamp((ctx.availableMinutes - needed) / ctx.availableMinutes, 0, 1);
+  return { key: 'time', label: 'זמן פנוי', points: maxPoints * (0.5 + 0.5 * margin), maxPoints };
 }
 
-function energyFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function energyFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
-  const gap = Math.abs(place.energyRequired - ctx.userState.energyLevel);
+  const gap = Math.abs(place.energyRequired - ctx.energyLevel);
   const points = maxPoints * clamp(1 - gap / 4, 0, 1);
   return { key: 'energy', label: 'רמת אנרגיה', points, maxPoints };
 }
 
-function budgetFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function budgetFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
   if (!place.priceLevel) return { key: 'budget', label: 'תקציב', points: maxPoints * 0.7, maxPoints };
-  const points = place.priceLevel <= ctx.userState.budget ? maxPoints : maxPoints * 0.3;
+  const points = place.priceLevel <= ctx.budget ? maxPoints : maxPoints * 0.3;
   return { key: 'budget', label: 'תקציב', points, maxPoints };
 }
 
-function groupFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function groupFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
-  const groupTag = ctx.userState.groupSize <= 1 ? 'solo' : ctx.userState.groupSize <= 2 ? 'couple' : 'friends';
+  const groupTag = ctx.groupSize <= 1 ? 'solo' : ctx.groupSize <= 2 ? 'couple' : 'friends';
   const fits = place.groupSuitability.includes('any') || place.groupSuitability.includes(groupTag);
   return { key: 'group', label: 'התאמה לקבוצה', points: fits ? maxPoints : maxPoints * 0.4, maxPoints };
 }
 
-function weatherFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
+function weatherFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 10;
-  const weather = ctx.userState.weather;
-  if (!weather || place.indoorOutdoor === 'both') {
+  const weather = ctx.weather;
+  if (!weather || !place.indoorOutdoor || place.indoorOutdoor === 'both') {
     return { key: 'weather', label: 'מזג אוויר', points: maxPoints * 0.8, maxPoints };
   }
   const badOutside = weather.condition === 'rain' || weather.condition === 'storm' || weather.condition === 'snow' || weather.tempC < 5;
@@ -81,9 +89,10 @@ function weatherFitFactor(place: Place, ctx: EngineContext): ScoreFactor {
   return { key: 'weather', label: 'מזג אוויר', points, maxPoints };
 }
 
-function freshnessFactor(place: Place): ScoreFactor {
+function freshnessFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   const maxPoints = 5;
-  return { key: 'freshness', label: 'לא ביקרנו עדיין', points: place.visited ? 0 : maxPoints, maxPoints };
+  const visited = ctx.visitedPlaces.includes(place.id);
+  return { key: 'freshness', label: 'לא ביקרנו עדיין', points: visited ? 0 : maxPoints, maxPoints };
 }
 
 function bookingFactor(place: Place): ScoreFactor {
@@ -91,7 +100,7 @@ function bookingFactor(place: Place): ScoreFactor {
   return { key: 'booking', label: 'לא דורש הזמנה מראש', points: place.requiresBooking ? 0 : maxPoints, maxPoints };
 }
 
-export function scorePlace(place: Place, ctx: EngineContext): ScoredPlace {
+export function scorePlace(place: Place, ctx: RecommendationContext): ScoredPlace {
   const { distanceKm, travelMinutes } = travelInfoFor(place, ctx);
 
   const factors: ScoreFactor[] = [
@@ -103,7 +112,7 @@ export function scorePlace(place: Place, ctx: EngineContext): ScoredPlace {
     budgetFitFactor(place, ctx),
     groupFitFactor(place, ctx),
     weatherFitFactor(place, ctx),
-    freshnessFactor(place),
+    freshnessFactor(place, ctx),
     bookingFactor(place),
   ];
 
@@ -111,8 +120,8 @@ export function scorePlace(place: Place, ctx: EngineContext): ScoredPlace {
   const maxScore = factors.reduce((sum, f) => sum + f.maxPoints, 0);
 
   const fitsInAvailableTime =
-    ctx.timeAvailableMinutes === null ||
-    (travelMinutes ?? 0) + place.estimatedDurationMinutes + TIME_BUFFER_MINUTES <= ctx.timeAvailableMinutes;
+    ctx.availableMinutes === null ||
+    (travelMinutes ?? 0) + place.estimatedDurationMinutes <= ctx.availableMinutes;
 
   return { place, score, maxScore, factors, distanceKm, travelMinutes, fitsInAvailableTime };
 }

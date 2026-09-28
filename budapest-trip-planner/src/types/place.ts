@@ -12,7 +12,8 @@ export type PlaceCategory =
   | 'attraction'
   | 'shopping'
   | 'adrenaline'
-  | 'water';
+  | 'water'
+  | 'casino';
 
 export type IndoorOutdoor = 'indoor' | 'outdoor' | 'both';
 
@@ -23,6 +24,14 @@ export type PriceLevel = 1 | 2 | 3 | 4;
  * Lifecycle status of a place for *this* trip. AVAILABLE is the only status
  * the recommendation engine will surface unprompted — everything else is
  * either finished, explicitly rejected, or needs a human step first.
+ *
+ * NEEDS_VERIFICATION: we have a specific reason to doubt the place is open/
+ * usable as planned (e.g. reports it's closed or under renovation) and it
+ * must not be recommended as a safe, open option until someone confirms it.
+ *
+ * CONFIRMED: this isn't a spontaneous option at all — it's a locked-in
+ * itinerary commitment (has a fixed date/time), so the engine shouldn't
+ * suggest it as an alternative the way it would an AVAILABLE place.
  */
 export type PlaceStatus =
   | 'AVAILABLE'
@@ -30,7 +39,9 @@ export type PlaceStatus =
   | 'SKIPPED'
   | 'NOT_RELEVANT'
   | 'CLOSED'
-  | 'BOOKING_REQUIRED';
+  | 'BOOKING_REQUIRED'
+  | 'NEEDS_VERIFICATION'
+  | 'CONFIRMED';
 
 /**
  * What kind of "mode" this place satisfies. Mirrors the home-screen mood
@@ -64,6 +75,9 @@ export interface GeoCoordinates {
   lng: number;
 }
 
+/** 0 (not hungry) – 3 (starving). Mirrors UserState's hunger scale so they compare directly. */
+export type HungerFitLevel = 0 | 1 | 2 | 3;
+
 export interface Place {
   id: string;
   name: string;
@@ -71,18 +85,23 @@ export interface Place {
   subcategory?: string;
   description: string;
 
-  location: string;
-  coordinates: GeoCoordinates;
+  /** Address/area text. Omitted when we don't have a verified address yet — never guessed. */
+  location?: string;
+  /** Omitted when real GPS coordinates aren't known yet — the engine treats a place without them as reachable-unknown rather than excluding it. */
+  coordinates?: GeoCoordinates;
 
   openingHours: OpeningHours;
   priceLevel?: PriceLevel;
   estimatedDurationMinutes: number;
-  indoorOutdoor: IndoorOutdoor;
+  /** Omitted when unknown — never guessed for a specific real venue. */
+  indoorOutdoor?: IndoorOutdoor;
 
   tags: string[];
   moodTags: MoodTag[];
   /** Energy required to enjoy this place, 1 (very low) – 5 (very high). Used to match against UserState.energyLevel. */
   energyRequired: 1 | 2 | 3 | 4 | 5;
+  /** How hungry someone should be for this to be the right call — lets the engine tell a dessert stop from a steakhouse within the same `food`/`cafe` category. Omitted when we don't have a real signal for it. */
+  hungerFit?: HungerFitLevel;
   groupSuitability: GroupTag[];
 
   requiresBooking: boolean;

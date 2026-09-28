@@ -1,6 +1,7 @@
 import {
   Bike,
   Coffee,
+  Dices,
   Martini,
   PartyPopper,
   ShoppingBag,
@@ -20,6 +21,7 @@ const ICONS: Record<PlaceCategory, LucideIcon> = {
   shopping: ShoppingBag,
   adrenaline: Bike,
   water: Waves,
+  casino: Dices,
 };
 
 export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
@@ -31,6 +33,7 @@ export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
   shopping: 'שופינג',
   adrenaline: 'אדרנלין',
   water: 'מים',
+  casino: 'קזינו',
 };
 
 interface CategoryIconProps {

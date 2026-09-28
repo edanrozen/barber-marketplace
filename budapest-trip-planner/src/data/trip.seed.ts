@@ -1,18 +1,22 @@
 import type { TripPlan } from '@/types';
+import { dateKey } from '@/lib/time';
 
 /**
- * Intentionally minimal placeholder trip. Replace `days` with the real
- * itinerary — the engine only needs `fixed` items (real commitments) and
- * `free_time` items (windows it's allowed to fill).
+ * Intentionally empty schedule — no real hours, bookings or activities yet.
+ * Replace `days` with the real itinerary once it's ready; only `fixed:
+ * true` items (flights, paid bookings, SPARTY-style locked commitments)
+ * need to be entered by hand — free time between them is computed
+ * automatically (see `lib/tripSchedule.ts::computeFreeTimeBlocks`).
  */
 export const TRIP_SEED: TripPlan = {
   destination: 'Budapest',
   timezone: 'Europe/Budapest',
   days: [
     {
-      date: new Date().toISOString().slice(0, 10),
+      id: 'day-1',
+      date: dateKey(new Date()),
       dayNumber: 1,
-      schedule: [],
+      scheduleItems: [],
     },
   ],
 };

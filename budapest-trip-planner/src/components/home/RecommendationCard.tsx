@@ -13,8 +13,13 @@ interface RecommendationCardProps {
 }
 
 function mapsUrl(scored: ScoredPlace): string {
-  const { lat, lng } = scored.place.coordinates;
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  const { coordinates, name, location } = scored.place;
+  if (coordinates) {
+    return `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
+  }
+  // No verified coordinates yet — fall back to a name search instead of guessing a location.
+  const query = [name, location, 'Budapest'].filter(Boolean).join(' ');
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
 export function RecommendationCard({

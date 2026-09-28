@@ -1,31 +1,50 @@
 /**
- * The fixed skeleton of a day — flights, bookings, meeting friends — plus the
- * open slots the recommendation engine is allowed to fill.
+ * The fixed skeleton of a day — flights, hotel check-in/out, paid bookings,
+ * SPARTY-style locked commitments — plus the flexible/free windows the
+ * recommendation engine is allowed to fill.
  */
+
+export type ScheduleItemType =
+  | 'FLIGHT'
+  | 'HOTEL'
+  | 'RESTAURANT'
+  | 'ATTRACTION'
+  | 'SHOPPING'
+  | 'NIGHTLIFE'
+  | 'TRANSPORT'
+  | 'FREE_TIME'
+  | 'OTHER';
 
 export type ScheduleItemStatus = 'confirmed' | 'suggested' | 'flexible' | 'cancelled';
 
-export type ScheduleItemType = 'fixed' | 'free_time';
-
 export interface ScheduleItem {
   id: string;
-  /** "HH:mm" 24h local time this block starts. */
-  time: string;
+  /** "HH:mm" 24h local time. */
+  startTime: string;
+  /** "HH:mm" 24h local time. */
+  endTime: string;
   title: string;
-  /** Set once the engine (or the user) has attached a concrete Place to this slot. */
+  type: ScheduleItemType;
+  /** Links this slot to a catalog Place, when one applies. */
   placeId?: string;
   status: ScheduleItemStatus;
-  type: ScheduleItemType;
-  /** Only meaningful for `free_time` blocks; how long the window is open. */
-  durationMinutes?: number;
+  /**
+   * true = locked in, can't be moved or overwritten (flight, paid booking,
+   * SPARTY, check-in/out time). false = flexible — can be rescheduled, or
+   * replaced by a recommendation. A flexible item may never be saved so
+   * that it overlaps a fixed one (enforced by the store, not just the UI).
+   */
+  fixed: boolean;
   notes?: string;
 }
 
 export interface TripDay {
-  /** ISO date, e.g. "2026-10-14". */
+  id: string;
+  /** ISO date, e.g. "2026-10-03". */
   date: string;
   dayNumber: number;
-  schedule: ScheduleItem[];
+  title?: string;
+  scheduleItems: ScheduleItem[];
 }
 
 export interface TripPlan {

@@ -1,7 +1,9 @@
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
+import { Lock, Pencil } from 'lucide-react';
 import type { ScheduleItem, ScheduleItemStatus } from '@/types';
 import { usePlacesStore } from '@/store';
+import { TYPE_ICON, TYPE_LABEL } from './scheduleItemMeta';
 
 const STATUS_DOT: Record<ScheduleItemStatus, string> = {
   confirmed: '🟢',
@@ -12,12 +14,12 @@ const STATUS_DOT: Record<ScheduleItemStatus, string> = {
 
 interface ScheduleItemRowProps {
   item: ScheduleItem;
-  onFillFreeTime?: ((item: ScheduleItem) => void) | undefined;
+  onEdit?: ((item: ScheduleItem) => void) | undefined;
 }
 
-export function ScheduleItemRow({ item, onFillFreeTime }: ScheduleItemRowProps): JSX.Element {
+export function ScheduleItemRow({ item, onEdit }: ScheduleItemRowProps): JSX.Element {
   const place = usePlacesStore((s) => (item.placeId ? s.places.find((p) => p.id === item.placeId) : undefined));
-  const isFreeTime = item.type === 'free_time';
+  const Icon = TYPE_ICON[item.type];
 
   return (
     <div
@@ -26,27 +28,39 @@ export function ScheduleItemRow({ item, onFillFreeTime }: ScheduleItemRowProps):
         item.status === 'cancelled' && 'opacity-50',
       )}
     >
-      <div className="w-12 shrink-0 text-center text-sm font-semibold text-ink-secondary">{item.time}</div>
-      <span className="text-lg leading-none">{STATUS_DOT[item.status]}</span>
-
-      <div className="min-w-0 flex-1">
-        {place ? (
-          <Link to={`/place/${place.id}`} className="block truncate text-sm font-medium text-ink-primary hover:text-accent-gold">
-            {item.title}
-          </Link>
-        ) : (
-          <p className="truncate text-sm font-medium text-ink-primary">{item.title}</p>
-        )}
-        {item.notes && <p className="truncate text-xs text-ink-muted">{item.notes}</p>}
+      <div className="w-16 shrink-0 text-center text-xs font-semibold text-ink-secondary">
+        <div>{item.startTime}</div>
+        <div className="text-ink-muted">{item.endTime}</div>
       </div>
 
-      {isFreeTime && onFillFreeTime && (
+      <span className="text-lg leading-none">{STATUS_DOT[item.status]}</span>
+      <Icon size={16} className="shrink-0 text-ink-muted" />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          {place ? (
+            <Link to={`/place/${place.id}`} className="truncate text-sm font-medium text-ink-primary hover:text-accent-gold">
+              {item.title}
+            </Link>
+          ) : (
+            <p className="truncate text-sm font-medium text-ink-primary">{item.title}</p>
+          )}
+          {item.fixed && <Lock size={11} className="shrink-0 text-accent-violet" />}
+        </div>
+        <p className="truncate text-xs text-ink-muted">
+          {TYPE_LABEL[item.type]}
+          {item.notes ? ` · ${item.notes}` : ''}
+        </p>
+      </div>
+
+      {onEdit && (
         <button
           type="button"
-          onClick={() => onFillFreeTime(item)}
-          className="shrink-0 rounded-full border border-accent-gold/40 px-3 py-1 text-xs font-medium text-accent-gold hover:bg-accent-gold/10"
+          onClick={() => onEdit(item)}
+          className="shrink-0 rounded-full p-1.5 text-ink-muted hover:bg-base-surface2 hover:text-ink-primary"
+          aria-label="עריכה"
         >
-          מה עושים?
+          <Pencil size={14} />
         </button>
       )}
     </div>

@@ -29,7 +29,7 @@ export function PlaceCard({ place }: { place: Place }): JSX.Element {
           {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
           <span>· {formatDuration(place.estimatedDurationMinutes)}</span>
         </p>
-        <p className="mt-1 truncate text-xs text-ink-secondary">{place.location}</p>
+        {place.location && <p className="mt-1 truncate text-xs text-ink-secondary">{place.location}</p>}
       </div>
     </Link>
   );
