@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import clsx from 'clsx';
@@ -16,11 +16,23 @@ export function TodayPage(): JSX.Element {
   const plan = useTripStore((s) => s.plan);
   const currentDayIndex = useTripStore((s) => s.currentDayIndex);
   const setCurrentDayIndex = useTripStore((s) => s.setCurrentDayIndex);
+  const todaysTripDay = useTripStore((s) => s.todaysTripDay);
   const userState = useUserStateStore((s) => s);
 
   const day = plan.days[currentDayIndex];
   const now = useMemo(() => getCurrentTime(), []);
 
+  // Open on the day the trip is actually on today, not always day 1.
+  useEffect(() => {
+    const real = todaysTripDay(now);
+    if (!real) return;
+    const idx = plan.days.findIndex((d) => d.id === real.id);
+    if (idx >= 0 && idx !== currentDayIndex) setCurrentDayIndex(idx);
+  }, []);
+
+  // getNextFixedActivity/buildRecommendationContext already return
+  // null/no-countdown on their own when `day` is days away from `now` —
+  // nothing extra to gate here.
   const nextActivity = useMemo(
     () => (day ? getNextFixedActivity(day, places, userState, now) : null),
     [day, places, userState, now],
@@ -47,8 +59,10 @@ export function TodayPage(): JSX.Element {
     <div className="flex min-h-full flex-col gap-4 pb-6">
       <div className="flex items-center justify-between px-4 pt-6">
         <div>
-          <h1 className="text-2xl font-extrabold">📅 הטיול שלי</h1>
-          <p className="mt-1 text-sm text-ink-secondary">{plan.destination}</p>
+          <h1 className="text-2xl font-extrabold">מה יש לכם היום?</h1>
+          <p className="mt-1 text-sm text-ink-secondary">
+            {plan.destination} · {day?.title ?? `יום ${day?.dayNumber ?? ''}`}
+          </p>
         </div>
         <button
           type="button"

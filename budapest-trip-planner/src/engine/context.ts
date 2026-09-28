@@ -1,6 +1,6 @@
 import type { MoodTag, Place, RecommendationContext, ScheduleItem, TripDay, UserState } from '@/types';
 import { getCurrentTime, minutesToHHMM, nowMinutes, parseHHMM } from '@/lib/time';
-import { findNextFixedItem, SAFETY_BUFFER_MINUTES } from '@/lib/tripSchedule';
+import { findNextFixedItem, referenceMinutesFor, SAFETY_BUFFER_MINUTES } from '@/lib/tripSchedule';
 import { getTravelTime } from '@/lib/distance';
 
 export interface BuildContextInput {
@@ -22,9 +22,15 @@ export interface BuildContextInput {
  */
 export function buildRecommendationContext(input: BuildContextInput): RecommendationContext {
   const now = input.now ?? getCurrentTime();
-  const currentMinutes = nowMinutes(now);
+  const rawReference = input.currentDay ? referenceMinutesFor(input.currentDay, now) : nowMinutes(now);
+  // A day that's days away (before or after "today") has no live countdown
+  // — +/-Infinity from referenceMinutesFor signals exactly that. Treat it
+  // the same as having no current day for schedule-derived fields, rather
+  // than letting Infinity leak into availableMinutes/timeUntilStart.
+  const liveDay = Number.isFinite(rawReference) ? input.currentDay : null;
+  const currentMinutes = Number.isFinite(rawReference) ? rawReference : nowMinutes(now);
 
-  const nextFixedActivity = input.currentDay ? findNextFixedItem(input.currentDay, currentMinutes) : null;
+  const nextFixedActivity = liveDay ? findNextFixedItem(liveDay, currentMinutes) : null;
   const nextFixedPlace = nextFixedActivity?.placeId
     ? (input.places.find((p) => p.id === nextFixedActivity.placeId) ?? null)
     : null;
@@ -80,7 +86,9 @@ export function getNextFixedActivity(
   now: Date,
 ): NextFixedActivityInfo | null {
   if (!day) return null;
-  const currentMinutes = nowMinutes(now);
+  const rawReference = referenceMinutesFor(day, now);
+  if (!Number.isFinite(rawReference)) return null; // day is days away — no live "next activity" to show
+  const currentMinutes = rawReference;
   const activity = findNextFixedItem(day, currentMinutes);
   if (!activity) return null;
 

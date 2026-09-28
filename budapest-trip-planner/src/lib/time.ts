@@ -50,6 +50,11 @@ export function nowMinutes(date: Date): number {
   return date.getHours() * 60 + date.getMinutes();
 }
 
+/** Wraps an extended-hour "HH:mm" (e.g. "24:00", "26:30") back to a normal clock display ("00:00", "02:30"). Storage/sorting keeps the extended form; only display goes through this. */
+export function formatClockTime(value: string): string {
+  return minutesToHHMM(parseHHMM(value));
+}
+
 /** "YYYY-MM-DD" from a Date's own local fields — never use `toISOString()` here, it UTC-shifts and can land on the wrong day. */
 export function dateKey(date: Date): string {
   const y = date.getFullYear();

@@ -46,7 +46,7 @@ export function ScheduleItemEditorPage(): JSX.Element {
 
   const [selectedDayId, setSelectedDayId] = useState(dayId ?? plan.days[0]?.id ?? '');
   const [startTime, setStartTime] = useState(existing?.startTime ?? '09:00');
-  const [endTime, setEndTime] = useState(existing?.endTime ?? '10:00');
+  const [endTime, setEndTime] = useState(existing?.endTime ?? '');
   const [title, setTitle] = useState(existing?.title ?? '');
   const [type, setType] = useState<ScheduleItemType>(existing?.type ?? 'OTHER');
   const [placeId, setPlaceId] = useState(existing?.placeId ?? '');
@@ -76,18 +76,18 @@ export function ScheduleItemEditorPage(): JSX.Element {
       setError('צריך שם לפעילות.');
       return;
     }
-    if (endTime <= startTime) {
-      setError('שעת הסיום חייבת להיות אחרי שעת ההתחלה.');
+    if (endTime && endTime <= startTime) {
+      setError('שעת הסיום חייבת להיות אחרי שעת ההתחלה (או השאירו ריק אם אין שעת סיום ידועה).');
       return;
     }
 
     const payload: Omit<ScheduleItem, 'id'> = {
       startTime,
-      endTime,
       title: title.trim(),
       type,
       status,
       fixed,
+      ...(endTime ? { endTime } : {}),
       ...(placeId ? { placeId } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {}),
     };
@@ -140,7 +140,7 @@ export function ScheduleItemEditorPage(): JSX.Element {
           <Field label="שעת התחלה">
             <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputClass} />
           </Field>
-          <Field label="שעת סיום">
+          <Field label="שעת סיום (אופציונלי)">
             <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputClass} />
           </Field>
         </div>

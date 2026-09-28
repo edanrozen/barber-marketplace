@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Lock, Pencil } from 'lucide-react';
 import type { ScheduleItem, ScheduleItemStatus } from '@/types';
 import { usePlacesStore } from '@/store';
+import { formatClockTime } from '@/lib/time';
 import { TYPE_ICON, TYPE_LABEL } from './scheduleItemMeta';
 
 const STATUS_DOT: Record<ScheduleItemStatus, string> = {
@@ -29,8 +30,8 @@ export function ScheduleItemRow({ item, onEdit }: ScheduleItemRowProps): JSX.Ele
       )}
     >
       <div className="w-16 shrink-0 text-center text-xs font-semibold text-ink-secondary">
-        <div>{item.startTime}</div>
-        <div className="text-ink-muted">{item.endTime}</div>
+        <div>{formatClockTime(item.startTime)}</div>
+        {item.endTime && <div className="text-ink-muted">{formatClockTime(item.endTime)}</div>}
       </div>
 
       <span className="text-lg leading-none">{STATUS_DOT[item.status]}</span>
