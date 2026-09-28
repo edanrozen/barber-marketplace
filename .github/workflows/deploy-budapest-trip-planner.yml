@@ -1,0 +1,58 @@
+name: Deploy Budapest Trip Planner (GitHub Pages)
+
+on:
+  push:
+    branches: [claude/budapest-ai-trip-planner-kj6i1z]
+    paths:
+      - "budapest-trip-planner/**"
+      - ".github/workflows/deploy-budapest-trip-planner.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: budapest-trip-planner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: budapest-trip-planner/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build (standalone app — its own package.json, not an npm workspace)
+        run: npm run build
+      # GitHub Pages has no server-side rewrites, so a hard refresh on a
+      # client-side route (e.g. /today) 404s. The standard SPA fix: Pages
+      # always serves a custom 404.html for any unmatched path, so a copy
+      # of index.html there makes the app shell load and React Router take
+      # over from its own basename/BASE_URL — no query-string redirect hack
+      # needed since this app uses BrowserRouter with a plain basename.
+      - name: SPA fallback for deep-link refresh
+        run: cp dist/index.html dist/404.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: budapest-trip-planner/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
