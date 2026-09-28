@@ -63,6 +63,18 @@ export function dateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Real opening-hours data is almost always partial (we might know Wed–Sat
+ * but not the rest). A day with no key at all means "we don't know", not
+ * "closed" — only an explicit range (or an explicit empty array for a
+ * confirmed-closed day) counts as known. Callers must check this before
+ * treating a missing day as closed, or every partially-known place would
+ * silently read as closed on the days we simply have no data for.
+ */
+export function hasKnownHoursForDay(openingHours: OpeningHours, date: Date): boolean {
+  return openingHours[weekdayOf(date)] !== undefined;
+}
+
 export function isOpenAt(openingHours: OpeningHours, date: Date): boolean {
   const day = weekdayOf(date);
   const ranges = openingHours[day];

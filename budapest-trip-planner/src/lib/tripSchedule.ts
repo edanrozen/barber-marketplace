@@ -86,13 +86,21 @@ export function findNextFixedItem(day: TripDay, nowMinutes: number): ScheduleIte
   return activeFixedItems(day).find((item) => itemStart(item) > nowMinutes) ?? null;
 }
 
-/** The item (fixed or flexible) actively happening right now, if any. */
+/**
+ * The item (fixed or flexible) actively happening right now, if any. When
+ * two items' windows both cover `nowMinutes` — which happens when an
+ * earlier item's ESTIMATED duration (a guess, e.g. "Warm Up ~90min") runs a
+ * little past a later item's REAL, explicit start (e.g. SPARTY at 21:30) —
+ * the one that started more recently wins: it has an actual confirmed
+ * start time that has passed, which is strictly more real than the earlier
+ * item's guessed end time still technically covering the clock.
+ */
 export function findCurrentItem(day: TripDay, nowMinutes: number, places: Place[]): ScheduleItem | null {
-  return (
-    activeItems(day).find(
-      (item) => itemStart(item) <= nowMinutes && nowMinutes < effectiveEndMinutes(item, places),
-    ) ?? null
+  const matches = activeItems(day).filter(
+    (item) => itemStart(item) <= nowMinutes && nowMinutes < effectiveEndMinutes(item, places),
   );
+  if (matches.length === 0) return null;
+  return matches.reduce((latest, item) => (itemStart(item) > itemStart(latest) ? item : latest));
 }
 
 /** Same as findCurrentItem, but only a FIXED item counts — being "in" a flexible block (e.g. a named-but-open sightseeing window) never blocks a spontaneous recommendation the way an ongoing locked commitment does. */

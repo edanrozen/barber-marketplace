@@ -1,6 +1,6 @@
 import type { Place, RecommendationContext } from '@/types';
 import { getTravelTime } from '@/lib/distance';
-import { isOpenAt } from '@/lib/time';
+import { hasKnownHoursForDay, isOpenAt } from '@/lib/time';
 import { moodOption } from './moods';
 import { MAX_REASONABLE_TRAVEL_MINUTES } from './types';
 
@@ -18,13 +18,17 @@ export function travelInfoFor(place: Place, ctx: RecommendationContext): TravelI
 }
 
 /**
- * Hours are treated as "unknown → allow" when the place has no entry at all
- * for today's weekday (we don't have the data yet), but "closed → exclude"
- * when there IS data and today just isn't in it.
+ * Hours are treated as "unknown → allow" whenever we don't have data for
+ * TODAY's specific weekday — not just when the place has no hours data at
+ * all. Real data is almost always partial (e.g. only Wed–Sat is known), and
+ * treating every unlisted day as "closed" would silently exclude places we
+ * simply have no information about, which is exactly the invented-data
+ * failure mode the catalog is built to avoid. Only an explicit range (or an
+ * explicit empty range for a confirmed-closed day) for today's weekday can
+ * ever exclude a place on hours.
  */
 function passesOpeningHours(place: Place, ctx: RecommendationContext): boolean {
-  const hasAnyHours = Object.keys(place.openingHours).length > 0;
-  if (!hasAnyHours) return true;
+  if (!hasKnownHoursForDay(place.openingHours, ctx.currentTime)) return true;
   return isOpenAt(place.openingHours, ctx.currentTime);
 }
 

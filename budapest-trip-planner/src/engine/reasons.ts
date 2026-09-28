@@ -1,5 +1,5 @@
 import type { RecommendationContext, ScoredPlace } from '@/types';
-import { isOpenAt } from '@/lib/time';
+import { hasKnownHoursForDay, isOpenAt } from '@/lib/time';
 
 const STRONG_RATIO = 0.8;
 
@@ -40,8 +40,7 @@ export function buildReasons(scored: ScoredPlace, ctx: RecommendationContext): s
     reasons.push('✓ מתאים לרמת האנרגיה כרגע');
   }
 
-  const hasHours = Object.keys(place.openingHours).length > 0;
-  if (hasHours && isOpenAt(place.openingHours, ctx.currentTime)) {
+  if (hasKnownHoursForDay(place.openingHours, ctx.currentTime) && isOpenAt(place.openingHours, ctx.currentTime)) {
     reasons.push('✓ פתוח עכשיו');
   }
 
@@ -60,8 +59,7 @@ export function buildReasons(scored: ScoredPlace, ctx: RecommendationContext): s
   return reasons.slice(0, 5);
 }
 
-/** The one honest line about hours, for when we simply don't know — never claims open OR closed without data. */
-export function openingHoursCaveat(scored: ScoredPlace): string | null {
-  const hasHours = Object.keys(scored.place.openingHours).length > 0;
-  return hasHours ? null : 'צריך לבדוק שעות פעילות.';
+/** The one honest line about hours, for when we simply don't know TODAY's status — never claims open OR closed without data. */
+export function openingHoursCaveat(scored: ScoredPlace, ctx: RecommendationContext): string | null {
+  return hasKnownHoursForDay(scored.place.openingHours, ctx.currentTime) ? null : 'צריך לבדוק שעות פעילות.';
 }

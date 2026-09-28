@@ -1,12 +1,12 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, MapPin, StickyNote } from 'lucide-react';
+import { ArrowRight, ExternalLink, MapPin, StickyNote, Clock3, CircleHelp } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
 import { usePlacesStore } from '@/store';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { EmptyState } from '@/components/common/EmptyState';
-import { formatDuration } from '@/lib/time';
+import { formatDuration, getCurrentTime, hasKnownHoursForDay, isOpenAt } from '@/lib/time';
 
 const STATUS_ACTIONS: { status: PlaceStatus; label: string }[] = [
   { status: 'AVAILABLE', label: 'זמין' },
@@ -22,6 +22,10 @@ export function PlaceDetailPage(): JSX.Element {
   const navigate = useNavigate();
   const place = usePlacesStore((s) => s.places.find((p) => p.id === placeId));
   const setStatus = usePlacesStore((s) => s.setStatus);
+
+  const now = getCurrentTime();
+  const hoursKnownToday = place ? hasKnownHoursForDay(place.openingHours, now) : false;
+  const openNow = place ? isOpenAt(place.openingHours, now) : false;
 
   if (!place) {
     return (
@@ -75,6 +79,20 @@ export function PlaceDetailPage(): JSX.Element {
           {place.location && (
             <p className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
               <MapPin size={14} /> {place.location}
+            </p>
+          )}
+          {hoursKnownToday ? (
+            <p
+              className={clsx(
+                'mt-1 flex items-center gap-1 text-sm font-medium',
+                openNow ? 'text-accent-teal' : 'text-ink-secondary',
+              )}
+            >
+              <Clock3 size={14} /> {openNow ? 'פתוח עכשיו' : 'סגור עכשיו'}
+            </p>
+          ) : (
+            <p className="mt-1 flex items-center gap-1 text-sm text-ink-muted">
+              <CircleHelp size={14} /> שעות פעילות לא ידועות
             </p>
           )}
         </div>

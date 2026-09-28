@@ -74,6 +74,9 @@ export function UserStatePage(): JSX.Element {
         currentLocation: { lat: pos.latitude, lng: pos.longitude },
         currentLocationLabel: null,
         locationSource: 'live',
+        // Explicitly tapping this button IS the consent ask — never show the
+        // Home flow's own prompt again after this.
+        locationConsent: 'granted',
       });
     } catch {
       // Permission denied or unsupported — leave whatever location (if any) we already had.

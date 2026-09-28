@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, MapPin, RefreshCcw, Navigation, ChevronDown, ThumbsDown, CircleCheck, ShieldAlert } from 'lucide-react';
+import { Clock, MapPin, RefreshCcw, Navigation, ChevronDown, ThumbsDown, CircleCheck, ShieldAlert, CircleOff } from 'lucide-react';
 import clsx from 'clsx';
 import type { ScoredPlace } from '@/types';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
@@ -20,14 +20,21 @@ interface RecommendationCardProps {
   justMarkedDone: boolean;
 }
 
-function mapsUrl(scored: ScoredPlace): string {
+/**
+ * Navigation fallback chain: precise coordinates first, a verified address
+ * second, and if we have neither, no link at all — never a bare name-only
+ * guess. The CTA disables itself and says why instead of offering a search
+ * that isn't grounded in anything we actually verified.
+ */
+function mapsUrl(scored: ScoredPlace): string | null {
   const { coordinates, name, location } = scored.place;
   if (coordinates) {
     return `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
   }
-  // No verified coordinates yet — fall back to a name search instead of guessing a location.
-  const query = [name, location, 'Budapest'].filter(Boolean).join(' ');
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  if (location) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, ${location}`)}`;
+  }
+  return null;
 }
 
 export function RecommendationCard({
@@ -44,6 +51,7 @@ export function RecommendationCard({
 }: RecommendationCardProps): JSX.Element {
   const { place } = scored;
   const [showWhy, setShowWhy] = useState(false);
+  const navUrl = mapsUrl(scored);
 
   return (
     <motion.div
@@ -94,8 +102,10 @@ export function RecommendationCard({
             </span>
           )}
           {scored.travelMinutes !== null && (
-            <span className="flex items-center gap-1">
-              <Navigation size={13} /> {scored.travelMinutes} דק׳ הליכה
+            // No live routing API is configured — this is a straight-line/walking-speed
+            // estimate (see lib/distance.ts), never presented as precise real-time routing.
+            <span className="flex items-center gap-1" title="הערכה לפי מרחק אווירי, לא ניווט חי">
+              <Navigation size={13} /> ~{scored.travelMinutes} דק׳ הליכה (משוער)
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -126,15 +136,28 @@ export function RecommendationCard({
         )}
 
         <div className="flex gap-2 pt-1">
-          <a
-            href={mapsUrl(scored)}
-            target="_blank"
-            rel="noreferrer"
-            onClick={onGo}
-            className="flex-1 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
-          >
-            יאללה לשם 🚀
-          </a>
+          {navUrl ? (
+            <a
+              href={navUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onGo}
+              className="flex-1 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
+            >
+              יאללה לשם 🚀
+            </a>
+          ) : (
+            <div
+              className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full bg-base-surface2 px-3 py-2 text-center"
+              title="אין לנו כתובת או מיקום מאומתים למקום הזה עדיין"
+            >
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-ink-muted">
+                <CircleOff size={14} />
+                אין ניווט זמין
+              </span>
+              <span className="text-[11px] text-ink-muted">לא אימתנו כתובת למקום הזה</span>
+            </div>
+          )}
           {hasMoreAlternatives && (
             <button
               type="button"

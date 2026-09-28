@@ -15,6 +15,7 @@ import type { PlaceCategory } from '@/types';
 import { MoodGrid } from '@/components/home/MoodGrid';
 import { RecommendationCard } from '@/components/home/RecommendationCard';
 import { LocationStatus } from '@/components/home/LocationStatus';
+import { LocationConsentPrompt } from '@/components/home/LocationConsentPrompt';
 import { EmptyState } from '@/components/common/EmptyState';
 import { getCurrentTime, formatDuration, formatClockTime, minutesToHHMM, nowMinutes } from '@/lib/time';
 import { resolveCurrentLocation } from '@/lib/geolocation';
@@ -71,9 +72,12 @@ export function HomePage(): JSX.Element {
     // avoidCategories/excludeIds only ever change via explicit user actions below, never reactively from `result` itself.
   }, [selectedMoodId, excludeIds, avoidCategories, places, userState, currentDay, previousDay, now]);
 
-  // A location fix materially improves the pick — but only worth asking for once the user has actually entered this flow.
+  // A location fix materially improves the pick — but only worth asking for
+  // once the user has actually entered this flow, AND only after our own
+  // plain-language consent ask (never the browser's native prompt cold).
+  // Once the user has answered (either way), this never asks again.
   useEffect(() => {
-    if (!selectedMoodId) return;
+    if (!selectedMoodId || userState.locationConsent !== 'granted') return;
     const fallbackPlace = tripState.nextFixedActivity?.placeId
       ? places.find((p) => p.id === tripState.nextFixedActivity?.placeId) ?? null
       : null;
@@ -84,7 +88,7 @@ export function HomePage(): JSX.Element {
       });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMoodId]);
+  }, [selectedMoodId, userState.locationConsent]);
 
   useEffect(() => {
     if (result?.best) {
@@ -137,7 +141,16 @@ export function HomePage(): JSX.Element {
     setJustMarkedDone(false);
   }
 
+  function handleAllowLocation(): void {
+    useUserStateStore.getState().set({ locationConsent: 'granted' });
+  }
+
+  function handleDeclineLocation(): void {
+    useUserStateStore.getState().set({ locationConsent: 'declined' });
+  }
+
   const selectedOption = selectedMoodId ? moodOption(selectedMoodId) : undefined;
+  const showLocationConsent = !!selectedMoodId && userState.locationConsent === 'unknown';
 
   return (
     <div className="flex min-h-full flex-col pb-6">
@@ -209,6 +222,10 @@ export function HomePage(): JSX.Element {
                 חזרה לבחירת מצב
               </button>
 
+              {showLocationConsent && (
+                <LocationConsentPrompt onAllow={handleAllowLocation} onNotNow={handleDeclineLocation} />
+              )}
+
               {!hasAnyPlaces ? (
                 <EmptyState
                   emoji="🗺️"
@@ -220,7 +237,7 @@ export function HomePage(): JSX.Element {
                   scored={result.best}
                   explanation={result.explanation}
                   reasons={buildReasons(result.best, result.context)}
-                  hoursCaveat={openingHoursCaveat(result.best)}
+                  hoursCaveat={openingHoursCaveat(result.best, result.context)}
                   onGo={handleGo}
                   onAnotherOption={handleAnotherOption}
                   onDismiss={handleDismiss}

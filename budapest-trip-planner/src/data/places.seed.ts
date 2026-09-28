@@ -2,11 +2,28 @@ import type { Place } from '@/types';
 
 /**
  * Real places for the trip. What's deliberately NOT here, because it wasn't
- * given and won't be guessed: addresses, coordinates, opening hours, prices,
- * ratings, websites/booking links. Those fields are simply omitted (not
- * `null`, since the types make them optional) — the engine already treats
- * "unknown" as "don't exclude, don't assume" for all of them (see
- * `engine/filters.ts` and `engine/scoring.ts`).
+ * given and won't be guessed: prices, ratings, websites/booking links.
+ * Those fields are simply omitted (not `null`, since the types make them
+ * optional) — the engine already treats "unknown" as "don't exclude, don't
+ * assume" for all of them (see `engine/filters.ts` and `engine/scoring.ts`).
+ *
+ * PHASE 6 real-data audit: `location` (address) and `coordinates` were
+ * added ONLY where verified via web search against a named, checkable
+ * source (an official site, Google Maps/Wikipedia/Wikidata listing, or a
+ * major review platform) — never estimated or interpolated. `openingHours`
+ * were added only where a source gave an unambiguous, specific range for a
+ * specific weekday; a day with no key at all means "we don't know", not
+ * "closed" (see `lib/time.ts`'s `hasKnownHoursForDay`). Where sources
+ * conflicted (e.g. Aquaworld's hours, 2D Café's opening time) or a real
+ * ambiguity existed (e.g. which Trófea Grill / FlashKart branch, ordinary
+ * hospitality-convention "closed the other days" implied but not stated
+ * explicitly), the field was left unset rather than guessed — each such
+ * case is called out in a comment next to that place.
+ *
+ * Still entirely unverified (left exactly as before, no search attempted):
+ * ruby-etterem, itoshii, cucina, nour, best-bagel-basilica, cinnamon-budapest,
+ * twenty-six, habibi-skybar, seven-cocktail-bar, red-ruin-bar, rosenstein
+ * (already blocked pending manual verification of its own).
  *
  * Two fields ARE estimated rather than sourced, because they're product
  * judgment calls (not verifiable facts) and the model requires them:
@@ -42,7 +59,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via web search (cinquecentobudapest.hu / Google Maps listing), Phase 6.
+    location: 'Zsilip utca 4, 1133 Budapest',
+    openingHours: {
+      mon: [{ open: '11:00', close: '14:30' }],
+      tue: [{ open: '11:00', close: '20:00' }],
+      wed: [{ open: '11:00', close: '20:00' }],
+      thu: [{ open: '11:00', close: '20:00' }],
+      fri: [{ open: '11:00', close: '20:00' }],
+      sat: [{ open: '11:00', close: '20:00' }],
+      sun: [{ open: '11:00', close: '20:00' }],
+    },
   },
   {
     id: 'grumpy-budapest',
@@ -59,6 +86,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address only (Phase 6) — sources gave contradictory/unclear
+    // hours across weekdays, so opening hours are left unknown rather than guessed.
+    location: 'Klauzál utca 34, 1072 Budapest',
     openingHours: {},
   },
   {
@@ -76,6 +106,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via mrsmash.hu (Phase 6) — note: not to be confused with the
+    // unrelated "Smashy Burger" chain that also serves smash burgers in Budapest.
+    location: 'Október 6. utca 10, 1051 Budapest',
     openingHours: {},
   },
   {
@@ -93,7 +126,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via beerstro14.hu / Tripadvisor (Phase 6).
+    location: 'Károlyi utca 12, 1053 Budapest',
+    openingHours: {
+      mon: [{ open: '17:00', close: '23:00' }],
+      tue: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+      wed: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+      thu: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+      fri: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+      sat: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+      sun: [{ open: '12:00', close: '16:00' }, { open: '17:00', close: '23:00' }],
+    },
   },
   {
     id: 'trofea-grill',
@@ -110,6 +153,12 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified location for the Király utca branch (Phase 6). Trófea Grill has
+    // several Budapest locations with different hours each, and the source
+    // that gave hours didn't confirm which branch — left unknown rather than
+    // risk attributing the wrong branch's hours.
+    location: 'Király utca 30-32, 1061 Budapest',
+    coordinates: { lat: 47.49962, lng: 19.05911 },
     openingHours: {},
   },
   {
@@ -127,7 +176,16 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via restaurant listings (Phase 6). Sat/Sun hours weren't given
+    // by the source, so left unknown rather than assumed.
+    location: 'Wesselényi utca 18, 1077 Budapest',
+    openingHours: {
+      mon: [{ open: '12:00', close: '22:30' }],
+      tue: [{ open: '12:00', close: '22:30' }],
+      wed: [{ open: '12:00', close: '23:00' }],
+      thu: [{ open: '12:00', close: '23:45' }],
+      fri: [{ open: '12:00', close: '23:45' }],
+    },
   },
   {
     id: 'rosenstein',
@@ -236,6 +294,11 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address (Phase 6). There's also a second branch at Király
+    // utca 33 — sources disagreed on the exact opening time (09:00 vs
+    // 10:00) for this one, so hours are left unknown rather than guessed.
+    location: 'Szent István körút 4, 1137 Budapest',
+    notes: 'קיים גם סניף שני ב-Király utca 33.',
     openingHours: {},
   },
   {
@@ -252,7 +315,16 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via kurtoskalacs.com (Phase 6). Source only listed Mon/Tue/Wed/Thu/Sun
+    // hours — Fri/Sat left unknown rather than assumed.
+    location: 'Váci utca 31, 1052 Budapest',
+    openingHours: {
+      mon: [{ open: '09:00', close: '20:00' }],
+      tue: [{ open: '09:00', close: '20:00' }],
+      wed: [{ open: '09:00', close: '20:00' }],
+      thu: [{ open: '09:00', close: '20:00' }],
+      sun: [{ open: '09:00', close: '20:00' }],
+    },
   },
   {
     id: 'best-bagel-basilica',
@@ -322,7 +394,18 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via Wikipedia / official listings (Phase 6).
+    location: 'Vámház körút 1-3, 1093 Budapest',
+    coordinates: { lat: 47.487072, lng: 19.058392 },
+    openingHours: {
+      mon: [{ open: '06:00', close: '18:00' }],
+      tue: [{ open: '06:00', close: '18:00' }],
+      wed: [{ open: '06:00', close: '18:00' }],
+      thu: [{ open: '06:00', close: '18:00' }],
+      fri: [{ open: '06:00', close: '18:00' }],
+      sat: [{ open: '06:00', close: '16:00' }],
+      sun: [{ open: '10:00', close: '16:00' }],
+    },
   },
 
   // 🍸 BARS
@@ -340,6 +423,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address only (Phase 6) — no opening hours found in a
+    // trustworthy source, left unknown.
+    location: 'Király utca 43, 1077 Budapest',
     openingHours: {},
   },
   {
@@ -356,6 +442,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address (Phase 6). Source only says "open daily from 6pm
+    // until late" — no real close time to encode, left unknown.
+    location: 'Síp utca 24, 1075 Budapest',
     openingHours: {},
   },
   {
@@ -372,6 +461,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Google Maps listing (Phase 6).
+    location: 'Kazinczy utca 14, 1075 Budapest',
+    coordinates: { lat: 47.497, lng: 19.0634 },
     openingHours: {},
   },
   {
@@ -388,7 +480,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via Google Maps listing (Phase 6). Source explicitly says closed Mondays.
+    location: 'Nagy Diófa utca 26, 1072 Budapest',
+    openingHours: {
+      mon: [],
+      tue: [{ open: '18:00', close: '01:00' }],
+      wed: [{ open: '18:00', close: '01:00' }],
+      thu: [{ open: '18:00', close: '01:00' }],
+      fri: [{ open: '18:00', close: '01:00' }],
+      sat: [{ open: '18:00', close: '01:00' }],
+      sun: [{ open: '18:00', close: '01:00' }],
+    },
   },
   {
     id: 'jardin-cocktail-bar',
@@ -404,6 +506,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address (Phase 6). Source only gives the opening time (6pm),
+    // no close time — left unknown rather than guessed.
+    location: 'Dob utca 16, 1072 Budapest',
     openingHours: {},
   },
   {
@@ -470,7 +575,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via themagic.hu / Tripadvisor (Phase 6).
+    location: 'Hajós utca 25, 1065 Budapest',
+    openingHours: {
+      mon: [{ open: '10:00', close: '22:00' }],
+      tue: [{ open: '10:00', close: '22:00' }],
+      wed: [{ open: '10:00', close: '22:00' }],
+      thu: [{ open: '10:00', close: '22:00' }],
+      fri: [{ open: '10:00', close: '22:00' }],
+      sat: [{ open: '10:00', close: '22:00' }],
+      sun: [{ open: '10:00', close: '22:00' }],
+    },
   },
 
   // 🕺 CLUBS
@@ -487,6 +602,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address only (Phase 6) — no reliable precise hours found (only "Thu-Sun, varies by night").
+    location: 'Zrínyi utca 4/A, 1051 Budapest',
     openingHours: {},
   },
   {
@@ -502,7 +619,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via instant-fogas.com (Phase 6): open every day, 18:00–06:00.
+    location: 'Akácfa utca 49-51, 1073 Budapest',
+    openingHours: {
+      sun: [{ open: '18:00', close: '06:00' }],
+      mon: [{ open: '18:00', close: '06:00' }],
+      tue: [{ open: '18:00', close: '06:00' }],
+      wed: [{ open: '18:00', close: '06:00' }],
+      thu: [{ open: '18:00', close: '06:00' }],
+      fri: [{ open: '18:00', close: '06:00' }],
+      sat: [{ open: '18:00', close: '06:00' }],
+    },
   },
   {
     id: 'doboz',
@@ -517,7 +644,15 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via doboz.co.hu (Phase 6): only Wed–Sat hours were stated by
+    // the source — Sun/Mon/Tue left unknown rather than assumed closed.
+    location: 'Klauzál utca 10, 1072 Budapest',
+    openingHours: {
+      wed: [{ open: '18:00', close: '06:00' }],
+      thu: [{ open: '18:00', close: '06:00' }],
+      fri: [{ open: '18:00', close: '06:00' }],
+      sat: [{ open: '18:00', close: '06:00' }],
+    },
   },
   {
     id: 'aether-club',
@@ -532,7 +667,15 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via aetherclub.com (Phase 6): inside Gozsdu Court, same
+    // building/coordinates as gozsdu-courtyard below. Only Fri/Sat hours
+    // stated by source — other days left unknown rather than assumed closed.
+    location: 'Király utca 13 (Gozsdu Udvar), 1075 Budapest',
+    coordinates: { lat: 47.4993444, lng: 19.058694 },
+    openingHours: {
+      fri: [{ open: '23:00', close: '06:00' }],
+      sat: [{ open: '23:00', close: '06:00' }],
+    },
   },
   {
     id: 'la-siesta-budapest',
@@ -543,11 +686,21 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['party'],
     energyRequired: 5,
     estimatedDurationMinutes: 180,
+    // Verified via lasiestaclub.hu (Phase 6).
+    location: 'Kazinczy utca 52/B, 1075 Budapest',
+    openingHours: {
+      sun: [{ open: '20:00', close: '05:00' }],
+      mon: [{ open: '20:00', close: '05:00' }],
+      tue: [{ open: '20:00', close: '05:00' }],
+      wed: [{ open: '20:00', close: '05:00' }],
+      thu: [{ open: '19:00', close: '05:00' }],
+      fri: [{ open: '18:00', close: '05:00' }],
+      sat: [{ open: '18:00', close: '05:00' }],
+    },
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
   },
   {
     id: 'sparty-szechenyi',
@@ -568,6 +721,10 @@ export const PLACES_SEED: Place[] = [
     status: 'CONFIRMED',
     notes:
       'פעילות מאושרת וקבועה בלו״ז לתאריך 3.10.2026 (מסיבת מרחצאות ב-Széchenyi) — לא רק אופציה גנרית. כשייבנה הלו״ז המלא בשלב הבא, יש לקשר אליה ScheduleItem מסוג fixed/confirmed לאותו תאריך.',
+    // Same building as szechenyi-thermal-bath below (Phase 6) — coordinates
+    // only; SPARTY is a special ticketed night event with its own schedule,
+    // so the bath's normal daytime hours don't apply to it and aren't set here.
+    coordinates: { lat: 47.5187, lng: 19.082 },
     openingHours: {},
   },
 
@@ -586,6 +743,15 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // FlashKart runs two Budapest branches (Blaha / KÖKI) — this is the
+    // central Blaha one, verified via Google Maps (Phase 6). Opening hours
+    // are deliberately left unset: the source's hours for this branch
+    // (from 15:00 on weekdays) directly contradict the itinerary's own
+    // confirmed 12:00 slot, meaning either the source is for the wrong
+    // branch or is otherwise unreliable — encoding it would risk wrongly
+    // excluding this place. Flagged in the Phase 6 report.
+    location: 'Blaha Lujza tér 5, 1085 Budapest',
+    coordinates: { lat: 47.4960747, lng: 19.0702553 },
     openingHours: {},
   },
   {
@@ -602,6 +768,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via baltadobalas.hu (Phase 6) — no reliable specific hours found.
+    location: 'Dohány utca 30/A, 1074 Budapest',
     openingHours: {},
   },
   {
@@ -620,6 +788,10 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified address (Phase 6) — sources disagreed on both open and close
+    // times (07:00–21:00 vs. 10:00–20:00), so hours are left unknown rather
+    // than picking one arbitrarily.
+    location: 'Íves út 16, 1044 Budapest',
     openingHours: {},
   },
   {
@@ -636,7 +808,19 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified via szechenyibath.hu / Wikipedia (Phase 6): daily 06:00-22:00
+    // (some indoor pools/saunas close a little earlier — using the general
+    // facility hours as the honest outer bound, not the sub-area detail).
+    coordinates: { lat: 47.5187, lng: 19.082 },
+    openingHours: {
+      sun: [{ open: '06:00', close: '22:00' }],
+      mon: [{ open: '06:00', close: '22:00' }],
+      tue: [{ open: '06:00', close: '22:00' }],
+      wed: [{ open: '06:00', close: '22:00' }],
+      thu: [{ open: '06:00', close: '22:00' }],
+      fri: [{ open: '06:00', close: '22:00' }],
+      sat: [{ open: '06:00', close: '22:00' }],
+    },
   },
   {
     id: 'buda-castle',
@@ -652,6 +836,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Wikipedia (Castle Hill / Várhegy) (Phase 6).
+    coordinates: { lat: 47.5028, lng: 19.0317 },
     openingHours: {},
   },
   {
@@ -668,6 +854,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Wikipedia (Phase 6).
+    coordinates: { lat: 47.5027, lng: 19.0344 },
     openingHours: {},
   },
   {
@@ -684,6 +872,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Wikipedia (Phase 6).
+    coordinates: { lat: 47.4975, lng: 19.055 },
     openingHours: {},
   },
   {
@@ -700,6 +890,8 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Wikidata (Phase 6).
+    coordinates: { lat: 47.4942, lng: 19.0525 },
     openingHours: {},
   },
   {
@@ -716,6 +908,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified street name/area (Phase 6) — it's a pedestrian street segment,
+    // not a single point, so no single coordinate pair is set.
+    location: 'Deák Ferenc utca, 1052 Budapest',
     openingHours: {},
   },
   {
@@ -733,7 +928,18 @@ export const PLACES_SEED: Place[] = [
     visited: false,
     status: 'AVAILABLE',
     notes: 'מסומן כאופציה של יום שופינג מלא (Shopping Day) ולא כביקור קצר של אטרקציה רגילה — משך הזמן המומלץ משקף את זה.',
-    openingHours: {},
+    // Verified via Wikipedia (Phase 6). Mall-wide hours; individual shops vary.
+    location: 'Váci út 1-3, 1062 Budapest',
+    coordinates: { lat: 47.511726, lng: 19.057491 },
+    openingHours: {
+      sun: [{ open: '08:00', close: '22:00' }],
+      mon: [{ open: '08:00', close: '22:00' }],
+      tue: [{ open: '08:00', close: '22:00' }],
+      wed: [{ open: '08:00', close: '22:00' }],
+      thu: [{ open: '08:00', close: '22:00' }],
+      fri: [{ open: '08:00', close: '22:00' }],
+      sat: [{ open: '08:00', close: '22:00' }],
+    },
   },
   {
     id: 'danube-night-cruise',
@@ -769,7 +975,17 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
-    openingHours: {},
+    // Verified address (Phase 6). Multiple sources explicitly confirm 24h/day.
+    location: 'Vigadó utca 2, 1051 Budapest',
+    openingHours: {
+      sun: [{ open: '00:00', close: '23:59' }],
+      mon: [{ open: '00:00', close: '23:59' }],
+      tue: [{ open: '00:00', close: '23:59' }],
+      wed: [{ open: '00:00', close: '23:59' }],
+      thu: [{ open: '00:00', close: '23:59' }],
+      fri: [{ open: '00:00', close: '23:59' }],
+      sat: [{ open: '00:00', close: '23:59' }],
+    },
   },
   {
     id: 'gozsdu-courtyard',
@@ -785,6 +1001,9 @@ export const PLACES_SEED: Place[] = [
     requiresBooking: false,
     visited: false,
     status: 'AVAILABLE',
+    // Verified via Wikipedia (Gozsdu-udvar) (Phase 6).
+    location: 'Király utca 13 / Dob utca 16, 1075 Budapest',
+    coordinates: { lat: 47.4993444, lng: 19.058694 },
     openingHours: {},
   },
 ];

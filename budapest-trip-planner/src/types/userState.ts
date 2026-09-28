@@ -18,6 +18,14 @@ export interface WeatherSnapshot {
 export type LocationSource = 'live' | 'last-known' | 'fallback' | 'none';
 
 /**
+ * Whether the user has answered our own "can we use your location?" ask.
+ * Browser geolocation is never requested until this is 'granted' — asked
+ * once, on first entering the mood flow, and never repeated afterwards
+ * regardless of the answer.
+ */
+export type LocationConsent = 'unknown' | 'granted' | 'declined';
+
+/**
  * Live snapshot of "where the humans are right now". This is the context the
  * recommendation engine reads on every call — it is never persisted as a
  * point-in-time log, only the current values.
@@ -27,6 +35,7 @@ export interface UserState {
   /** Free-text fallback when GPS isn't available/trusted (e.g. "Buda Castle"). */
   currentLocationLabel: string | null;
   locationSource: LocationSource;
+  locationConsent: LocationConsent;
 
   hungerLevel: Level0to3;
   thirstLevel: Level0to3;
@@ -43,6 +52,7 @@ export const DEFAULT_USER_STATE: UserState = {
   currentLocation: null,
   currentLocationLabel: null,
   locationSource: 'none',
+  locationConsent: 'unknown',
   hungerLevel: 1,
   thirstLevel: 1,
   energyLevel: 3,
