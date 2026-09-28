@@ -9,30 +9,33 @@ export default {
         sans: ['Heebo', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // White + pink palette — every color below is white or a shade of pink,
+        // differentiated by saturation/darkness rather than by hue, so semantic
+        // meaning (primary/success/danger) still reads even within one family.
         base: {
-          bg: '#0B0D12',
-          surface: '#14171F',
-          surface2: '#1C2029',
-          border: '#262B36',
+          bg: '#FFFFFF',
+          surface: '#FFF6FA',
+          surface2: '#FDE7F1',
+          border: '#F9C9DE',
         },
         accent: {
-          gold: '#F0B429',
-          violet: '#8B5CF6',
-          teal: '#2DD4BF',
-          rose: '#FB7185',
+          gold: '#EC4899', // primary CTA / highlight (hot pink)
+          violet: '#F472B6', // secondary accent (medium pink)
+          teal: '#DB2777', // success / "done" (deep pink)
+          rose: '#E11D48', // danger / dismiss (rose-red)
         },
         ink: {
-          primary: '#F5F6F8',
-          secondary: '#A3A9B8',
-          muted: '#6B7180',
+          primary: '#3B0A24',
+          secondary: '#8B5D75',
+          muted: '#C48DA8',
         },
       },
       borderRadius: {
         xl2: '1.25rem',
       },
       boxShadow: {
-        card: '0 8px 30px -12px rgba(0,0,0,0.6)',
-        glow: '0 0 0 1px rgba(240,180,41,0.25), 0 8px 24px -8px rgba(240,180,41,0.35)',
+        card: '0 8px 30px -12px rgba(219,39,119,0.18)',
+        glow: '0 0 0 1px rgba(236,72,153,0.25), 0 8px 24px -8px rgba(236,72,153,0.35)',
       },
       keyframes: {
         'pulse-soft': {

@@ -165,6 +165,7 @@ export function HomePage(): JSX.Element {
           </span>
         </div>
         <p className="mt-1 text-sm text-ink-secondary">מה בא לכם עכשיו?</p>
+        <p className="mt-0.5 text-xs font-medium text-accent-teal">לא התבזת לא נהנת 🎉</p>
         <div className="mt-2 flex items-center justify-between">
           {tripState.nextFixedActivity && (
             <p className="text-xs text-ink-muted">
