@@ -13,9 +13,11 @@ export interface WeatherSnapshot {
  * "📍 ..." status line, never a blocking indicator. 'live' = fresh GPS
  * fix just now; 'last-known' = an earlier GPS fix, reused because a fresh
  * one wasn't available; 'fallback' = the coordinates of whatever's on the
- * schedule right now (no GPS at all); 'none' = no location info at all.
+ * schedule right now (no GPS at all); 'hotel' = no GPS and no active
+ * schedule item either, so the trip's home base (Hotel Mika) is used as
+ * the reference point instead of nothing; 'none' = no location info at all.
  */
-export type LocationSource = 'live' | 'last-known' | 'fallback' | 'none';
+export type LocationSource = 'live' | 'last-known' | 'fallback' | 'hotel' | 'none';
 
 /**
  * Whether the user has answered our own "can we use your location?" ask.

@@ -1,4 +1,5 @@
 import type { GeoCoordinates, LocationSource, Place } from '@/types';
+import { HOTEL_MIKA } from '@/data/hotel';
 
 export interface RawGeoPosition {
   latitude: number;
@@ -44,8 +45,11 @@ export interface ResolvedLocation {
  * The fallback chain the brief asks for: try a fresh GPS fix; if that
  * fails or is denied, reuse the last known fix; if there's never been
  * one, fall back to wherever the current/next scheduled activity's place
- * is (when it has real coordinates); otherwise admit there's nothing.
- * Never throws — always resolves to *some* tier, even 'none'.
+ * is (when it has real coordinates); if there's no active schedule item
+ * either, fall back to the trip's home base (Hotel Mika) rather than
+ * admitting nothing — a real, verified reference point beats no distance
+ * signal at all. Never throws — always resolves to *some* tier, even
+ * 'none' (only if even that verified coordinate were ever unavailable).
  */
 export async function resolveCurrentLocation(
   lastKnown: GeoCoordinates | null,
@@ -59,6 +63,6 @@ export async function resolveCurrentLocation(
     if (scheduleFallbackPlace?.coordinates) {
       return { coordinates: scheduleFallbackPlace.coordinates, source: 'fallback' };
     }
-    return { coordinates: null, source: 'none' };
+    return { coordinates: HOTEL_MIKA.coordinates, source: 'hotel' };
   }
 }

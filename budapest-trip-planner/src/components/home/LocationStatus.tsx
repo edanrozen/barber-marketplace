@@ -4,6 +4,7 @@ const STATUS_TEXT: Record<LocationSource, string> = {
   live: '📍 המיקום שלך מעודכן',
   'last-known': '📍 משתמשים במיקום האחרון',
   fallback: '📍 מיקום משוער לפי הלו״ז',
+  hotel: '📍 מיקום משוער לפי המלון',
   none: '📍 אין גישה למיקום',
 };
 

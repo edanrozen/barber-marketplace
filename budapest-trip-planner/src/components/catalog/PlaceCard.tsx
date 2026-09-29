@@ -26,6 +26,7 @@ export function PlaceCard({ place }: { place: Place }): JSX.Element {
         <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-muted">
           <CategoryIcon category={place.category} size={12} />
           {CATEGORY_LABELS[place.category]}
+          {place.subcategory && <span>· {place.subcategory}</span>}
           {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
           <span>· {formatDuration(place.estimatedDurationMinutes)}</span>
         </p>
