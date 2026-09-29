@@ -6,6 +6,7 @@ import type { ScoredPlace } from '@/types';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
 import { formatDistance } from '@/lib/distance';
 import { formatDuration } from '@/lib/time';
+import { mapsUrl } from '@/lib/maps';
 
 interface RecommendationCardProps {
   scored: ScoredPlace;
@@ -18,23 +19,6 @@ interface RecommendationCardProps {
   onMarkDone: () => void;
   hasMoreAlternatives: boolean;
   justMarkedDone: boolean;
-}
-
-/**
- * Navigation fallback chain: precise coordinates first, a verified address
- * second, and if we have neither, no link at all — never a bare name-only
- * guess. The CTA disables itself and says why instead of offering a search
- * that isn't grounded in anything we actually verified.
- */
-function mapsUrl(scored: ScoredPlace): string | null {
-  const { coordinates, name, location } = scored.place;
-  if (coordinates) {
-    return `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
-  }
-  if (location) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, ${location}`)}`;
-  }
-  return null;
 }
 
 export function RecommendationCard({
@@ -51,7 +35,7 @@ export function RecommendationCard({
 }: RecommendationCardProps): JSX.Element {
   const { place } = scored;
   const [showWhy, setShowWhy] = useState(false);
-  const navUrl = mapsUrl(scored);
+  const navUrl = mapsUrl(place);
 
   return (
     <motion.div

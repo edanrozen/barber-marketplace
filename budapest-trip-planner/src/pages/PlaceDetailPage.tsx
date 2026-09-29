@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, MapPin, StickyNote, Clock3, CircleHelp } from 'lucide-react';
+import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
 import { usePlacesStore } from '@/store';
@@ -7,6 +7,7 @@ import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon'
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { EmptyState } from '@/components/common/EmptyState';
 import { formatDuration, getCurrentTime, hasKnownHoursForDay, isOpenAt } from '@/lib/time';
+import { mapsUrl } from '@/lib/maps';
 
 const STATUS_ACTIONS: { status: PlaceStatus; label: string }[] = [
   { status: 'AVAILABLE', label: 'זמין' },
@@ -41,6 +42,8 @@ export function PlaceDetailPage(): JSX.Element {
       />
     );
   }
+
+  const navUrl = mapsUrl(place);
 
   return (
     <div className="flex min-h-full flex-col gap-4 pb-6">
@@ -124,6 +127,26 @@ export function PlaceDetailPage(): JSX.Element {
             </span>
           ))}
         </div>
+
+        {navUrl ? (
+          <a
+            href={navUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-1.5 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
+          >
+            <Navigation size={15} />
+            ניווט למקום
+          </a>
+        ) : (
+          <div
+            className="flex items-center justify-center gap-1.5 rounded-full bg-base-surface2 px-3 py-2.5 text-center text-sm font-semibold text-ink-muted"
+            title="אין לנו כתובת או מיקום מאומתים למקום הזה עדיין"
+          >
+            <CircleOff size={14} />
+            אין ניווט זמין — לא אימתנו כתובת למקום הזה
+          </div>
+        )}
 
         {(place.website || place.bookingUrl) && (
           <div className="flex gap-2">
