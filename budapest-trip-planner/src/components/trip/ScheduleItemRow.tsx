@@ -16,16 +16,18 @@ const STATUS_DOT: Record<ScheduleItemStatus, string> = {
 interface ScheduleItemRowProps {
   item: ScheduleItem;
   onEdit?: ((item: ScheduleItem) => void) | undefined;
+  isCurrent?: boolean;
 }
 
-export function ScheduleItemRow({ item, onEdit }: ScheduleItemRowProps): JSX.Element {
+export function ScheduleItemRow({ item, onEdit, isCurrent }: ScheduleItemRowProps): JSX.Element {
   const place = usePlacesStore((s) => (item.placeId ? s.places.find((p) => p.id === item.placeId) : undefined));
   const Icon = TYPE_ICON[item.type];
 
   return (
     <div
       className={clsx(
-        'flex items-center gap-3 rounded-xl2 border border-base-border bg-base-surface px-3 py-3',
+        'relative flex items-center gap-3 rounded-xl2 border bg-base-surface px-3 py-3 transition-colors',
+        isCurrent ? 'border-accent-gold shadow-glow' : 'border-base-border',
         item.status === 'cancelled' && 'opacity-50',
       )}
     >
@@ -34,8 +36,10 @@ export function ScheduleItemRow({ item, onEdit }: ScheduleItemRowProps): JSX.Ele
         {item.endTime && <div className="text-ink-muted">{formatClockTime(item.endTime)}</div>}
       </div>
 
-      <span className="text-lg leading-none">{STATUS_DOT[item.status]}</span>
-      <Icon size={16} className="shrink-0 text-ink-muted" />
+      <span className={clsx('text-lg leading-none', isCurrent && 'animate-pulse-soft')}>
+        {isCurrent ? '●' : STATUS_DOT[item.status]}
+      </span>
+      <Icon size={16} className={clsx('shrink-0', isCurrent ? 'text-accent-gold' : 'text-ink-muted')} />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">

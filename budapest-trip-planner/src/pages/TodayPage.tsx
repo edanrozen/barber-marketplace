@@ -2,13 +2,15 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import clsx from 'clsx';
-import { usePlacesStore, useTripStore, useUserStateStore } from '@/store';
+import { usePlacesStore, useTripStore, useUserStateStore, useWeatherStore } from '@/store';
 import { DayTimeline } from '@/components/trip/DayTimeline';
 import { ScheduleHeader } from '@/components/trip/ScheduleHeader';
 import { ConflictWarnings } from '@/components/trip/ConflictWarnings';
 import { TripProgress } from '@/components/trip/TripProgress';
 import { getNextFixedActivity, detectScheduleConflicts, buildRecommendationContext } from '@/engine/recommendationEngine';
 import { getCurrentTime } from '@/lib/time';
+import { useWeatherSync } from '@/hooks/useWeatherSync';
+import { weatherContextMessage } from '@/lib/weatherVisuals';
 import type { ScheduleItem } from '@/types';
 
 export function TodayPage(): JSX.Element {
@@ -19,6 +21,10 @@ export function TodayPage(): JSX.Element {
   const setCurrentDayIndex = useTripStore((s) => s.setCurrentDayIndex);
   const todaysTripDay = useTripStore((s) => s.todaysTripDay);
   const userState = useUserStateStore((s) => s);
+  useWeatherSync();
+  const currentWeather = useWeatherStore((s) => s.current);
+  const weatherLoading = useWeatherStore((s) => s.currentLoading);
+  const weatherError = useWeatherStore((s) => s.currentError);
 
   const day = plan.days[currentDayIndex];
   const now = useMemo(() => getCurrentTime(), []);
@@ -94,6 +100,30 @@ export function TodayPage(): JSX.Element {
           ))}
         </div>
       )}
+
+      <div className="px-4">
+        {weatherLoading && !currentWeather && <p className="text-xs text-ink-muted animate-pulse-soft">🌤️ טוען מזג אוויר...</p>}
+        {weatherError && !currentWeather && <p className="text-xs text-ink-muted">לא הצלחנו לטעון את מזג האוויר</p>}
+        {currentWeather && userState.weather && (
+          <div className="flex items-center justify-between rounded-xl2 border border-base-border bg-base-surface p-3">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{currentWeather.icon}</span>
+              <div>
+                <p className="text-sm font-bold text-ink-primary">
+                  {currentWeather.temperature}° · מרגיש כמו {currentWeather.feelsLike}°
+                </p>
+                <p className="text-xs text-ink-muted">
+                  {currentWeather.description}
+                  {currentWeather.precipitationProbability !== null && <> · גשם {currentWeather.precipitationProbability}%</>}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {userState.weather && (
+          <p className="mt-2 text-xs font-medium text-ink-secondary">{weatherContextMessage(userState.weather)}</p>
+        )}
+      </div>
 
       {day && <ScheduleHeader availableMinutes={availableMinutes} nextActivity={nextActivity} />}
       <ConflictWarnings conflicts={conflicts} />

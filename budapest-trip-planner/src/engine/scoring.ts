@@ -91,16 +91,64 @@ function groupFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
   return { key: 'group', label: 'התאמה לקבוצה', points: fits ? maxPoints : maxPoints * 0.4, maxPoints };
 }
 
-function weatherFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
-  const maxPoints = 10;
-  const weather = ctx.weather;
-  if (!weather || !place.indoorOutdoor || place.indoorOutdoor === 'both') {
-    return { key: 'weather', label: 'מזג אוויר', points: maxPoints * 0.8, maxPoints };
+/**
+ * Most places don't carry an explicit `indoorOutdoor` fact (verified only
+ * where a real, checkable property of the venue makes it obvious — see
+ * places.seed.ts's Phase 6 comments). For everything else, category is a
+ * reasonable default: a bar/café/restaurant/club/casino is indoor, a
+ * sightseeing attraction is outdoor by default. This is only ever a
+ * fallback — a real per-place fact always wins.
+ */
+export function inferIndoorOutdoor(place: Place): NonNullable<Place['indoorOutdoor']> {
+  if (place.indoorOutdoor) return place.indoorOutdoor;
+  switch (place.category) {
+    case 'food':
+    case 'cafe':
+    case 'bar':
+    case 'club':
+    case 'casino':
+    case 'medical':
+    case 'adrenaline':
+    case 'water':
+    case 'shopping':
+      return 'indoor';
+    case 'attraction':
+      return 'outdoor';
+    default:
+      return 'both';
   }
-  const badOutside = weather.condition === 'rain' || weather.condition === 'storm' || weather.condition === 'snow' || weather.tempC < 5;
-  const points = badOutside
-    ? place.indoorOutdoor === 'indoor' ? maxPoints : maxPoints * 0.2
-    : place.indoorOutdoor === 'outdoor' ? maxPoints : maxPoints * 0.7;
+}
+
+/**
+ * "Critical" per the brief: a real weather signal, weighted close to
+ * distance/time (15, not the old 10) so it can genuinely move the ranking —
+ * while never fully zeroing out an option (a strong penalty, not
+ * elimination — see the brief's "do not completely eliminate unless there's
+ * a genuine safety/availability reason").
+ *
+ * When weather is unavailable, this factor contributes literally nothing —
+ * 0 points out of 0 maxPoints — rather than guessing a neutral value, so a
+ * weather outage can never bias the ranking one way or another.
+ */
+function weatherFitFactor(place: Place, ctx: RecommendationContext): ScoreFactor {
+  const maxPoints = 15;
+  const weather = ctx.weather;
+  if (!weather) return { key: 'weather', label: 'מזג אוויר', points: 0, maxPoints: 0 };
+
+  const io = inferIndoorOutdoor(place);
+  if (io === 'both') return { key: 'weather', label: 'מזג אוויר', points: maxPoints * 0.8, maxPoints };
+
+  if (weather.isRaining) {
+    const points = io === 'indoor' ? maxPoints : maxPoints * 0.15;
+    return { key: 'weather', label: 'מזג אוויר', points, maxPoints };
+  }
+  if (weather.isComfortableOutside) {
+    const points = io === 'outdoor' ? maxPoints : maxPoints * 0.75;
+    return { key: 'weather', label: 'מזג אוויר', points, maxPoints };
+  }
+  // Not raining, but not comfortable either (too hot/cold, or snow/storm
+  // without active rain) — a mild nudge toward indoor, never a hard penalty.
+  const points = io === 'indoor' ? maxPoints * 0.85 : maxPoints * 0.5;
   return { key: 'weather', label: 'מזג אוויר', points, maxPoints };
 }
 

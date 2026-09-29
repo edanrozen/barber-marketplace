@@ -8,6 +8,8 @@ import { PlaceDetailPage } from './pages/PlaceDetailPage';
 import { UserStatePage } from './pages/UserStatePage';
 import { ScheduleItemEditorPage } from './pages/ScheduleItemEditorPage';
 import { MedicalPage } from './pages/MedicalPage';
+import { WeatherPage } from './pages/WeatherPage';
+import { MorePage } from './pages/MorePage';
 
 export default function App(): JSX.Element {
   const { pathname } = useLocation();
@@ -23,6 +25,8 @@ export default function App(): JSX.Element {
           <Route path="/state" element={<UserStatePage />} />
           <Route path="/schedule" element={<ScheduleItemEditorPage />} />
           <Route path="/medical" element={<MedicalPage />} />
+          <Route path="/weather" element={<WeatherPage />} />
+          <Route path="/more" element={<MorePage />} />
         </Routes>
       </ErrorBoundary>
     </AppShell>

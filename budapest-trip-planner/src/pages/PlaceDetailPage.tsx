@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp, AlertTriangle, Phone } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp, AlertTriangle, Phone, Heart, ThumbsDown, Star } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
 import { usePlacesStore } from '@/store';
@@ -23,6 +24,7 @@ export function PlaceDetailPage(): JSX.Element {
   const navigate = useNavigate();
   const place = usePlacesStore((s) => s.places.find((p) => p.id === placeId));
   const setStatus = usePlacesStore((s) => s.setStatus);
+  const toggleSaved = usePlacesStore((s) => s.toggleSaved);
 
   const now = getCurrentTime();
   const hoursKnownToday = place ? hasKnownHoursForDay(place.openingHours, now) : false;
@@ -59,15 +61,19 @@ export function PlaceDetailPage(): JSX.Element {
         </button>
       </div>
 
-      <div className="relative h-44 w-full bg-base-surface2">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative h-48 w-full bg-gradient-to-br from-accent-gold/15 via-accent-violet/10 to-base-surface2"
+      >
         {place.image ? (
           <img src={place.image} alt={place.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-ink-muted">
-            <CategoryIcon category={place.category} size={44} />
+            <CategoryIcon category={place.category} size={48} />
           </div>
         )}
-      </div>
+      </motion.div>
 
       <div className="flex flex-col gap-4 px-4">
         <div>
@@ -75,9 +81,14 @@ export function PlaceDetailPage(): JSX.Element {
             <CategoryIcon category={place.category} size={14} />
             <span>{CATEGORY_LABELS[place.category]}</span>
             {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
+            {place.rating !== undefined && (
+              <span className="flex items-center gap-0.5 text-accent-gold">
+                <Star size={12} fill="currentColor" /> {place.rating.toFixed(1)}
+              </span>
+            )}
           </div>
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-xl font-bold text-ink-primary">{place.name}</h1>
+            <h1 className="text-xl font-extrabold text-ink-primary">{place.name}</h1>
             <StatusBadge status={place.status} />
           </div>
           {place.location && (
@@ -157,7 +168,7 @@ export function PlaceDetailPage(): JSX.Element {
             )}
           >
             <Navigation size={15} />
-            {isMedical ? 'נווטו לשם 🚑' : 'ניווט למקום'}
+            {isMedical ? 'נווטו לשם 🚑' : 'בואו לשם 🚀'}
           </a>
         ) : (
           <div
@@ -166,6 +177,39 @@ export function PlaceDetailPage(): JSX.Element {
           >
             <CircleOff size={14} />
             אין ניווט זמין — לא אימתנו כתובת למקום הזה
+          </div>
+        )}
+
+        {!isMedical && (
+          <div className="flex gap-2">
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.95 }}
+              onClick={() => toggleSaved(place.id)}
+              className={clsx(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-full border py-2 text-xs font-medium transition-colors',
+                place.saved
+                  ? 'border-accent-rose/50 bg-accent-rose/10 text-accent-rose'
+                  : 'border-base-border text-ink-muted hover:border-accent-rose/40 hover:text-accent-rose',
+              )}
+            >
+              <Heart size={13} fill={place.saved ? 'currentColor' : 'none'} />
+              {place.saved ? 'שמור ✓' : 'שמור'}
+            </motion.button>
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setStatus(place.id, 'NOT_RELEVANT')}
+              className={clsx(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-full border py-2 text-xs font-medium transition-colors',
+                place.status === 'NOT_RELEVANT'
+                  ? 'border-ink-muted/50 bg-base-surface2 text-ink-secondary'
+                  : 'border-base-border text-ink-muted hover:border-ink-secondary/40 hover:text-ink-secondary',
+              )}
+            >
+              <ThumbsDown size={13} />
+              לא בשבילנו
+            </motion.button>
           </div>
         )}
 

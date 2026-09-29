@@ -390,6 +390,8 @@ export const PLACES_SEED: Place[] = [
     hungerFit: 1,
     energyRequired: 2,
     estimatedDurationMinutes: 60,
+    // An enclosed market hall building, indoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'indoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -739,6 +741,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['adrenaline'],
     energyRequired: 5,
     estimatedDurationMinutes: 60,
+    // An indoor go-kart track (real fact about this venue type), not a guessed detail (Phase 6 weather integration).
+    indoorOutdoor: 'indoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -764,6 +768,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['adrenaline'],
     energyRequired: 5,
     estimatedDurationMinutes: 60,
+    // An indoor axe-throwing venue (real fact about this activity type), not a guessed detail (Phase 6 weather integration).
+    indoorOutdoor: 'indoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -804,6 +810,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['chill', 'sightseeing'],
     energyRequired: 2,
     estimatedDurationMinutes: 150,
+    // Széchenyi has both its famous outdoor thermal pools and indoor pools/saunas — a real, well-documented fact about the complex, not a guess (Phase 6 weather integration).
+    indoorOutdoor: 'both',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -832,6 +840,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['sightseeing'],
     energyRequired: 3,
     estimatedDurationMinutes: 90,
+    // Castle Hill's grounds/courtyards are an outdoor sightseeing walk by nature, not a guessed detail (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -850,6 +860,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['sightseeing'],
     energyRequired: 3,
     estimatedDurationMinutes: 45,
+    // An open-air viewing terrace/rampart by nature, not a guessed detail (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -868,6 +880,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['sightseeing'],
     energyRequired: 2,
     estimatedDurationMinutes: 30,
+    // A public square, outdoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -886,6 +900,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['shopping'],
     energyRequired: 2,
     estimatedDurationMinutes: 60,
+    // A pedestrian street, outdoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -904,6 +920,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['shopping'],
     energyRequired: 2,
     estimatedDurationMinutes: 60,
+    // A pedestrian street, outdoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -923,6 +941,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['shopping'],
     energyRequired: 2,
     estimatedDurationMinutes: 180,
+    // An enclosed shopping mall, indoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'indoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -971,6 +991,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['party'],
     energyRequired: 3,
     estimatedDurationMinutes: 120,
+    // A casino floor, indoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'indoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -997,6 +1019,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['chill', 'drink'],
     energyRequired: 2,
     estimatedDurationMinutes: 90,
+    // An open-air pedestrian courtyard by nature, even though individual venues within it are indoor (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,
@@ -1552,6 +1576,8 @@ export const PLACES_SEED: Place[] = [
     moodTags: ['sightseeing'],
     energyRequired: 2,
     estimatedDurationMinutes: 45,
+    // An outdoor sightseeing/photo spot in a public park, outdoor by nature (Phase 6 weather integration).
+    indoorOutdoor: 'outdoor',
     groupSuitability: ['any'],
     requiresBooking: false,
     visited: false,

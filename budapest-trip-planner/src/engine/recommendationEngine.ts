@@ -80,3 +80,4 @@ export { buildReasons, openingHoursCaveat } from './reasons';
 export { MOOD_OPTIONS, moodOption } from './moods';
 export { detectScheduleConflicts, computeFreeTimeBlocks } from '@/lib/tripSchedule';
 export type { FreeTimeBlock, ScheduleConflict } from '@/lib/tripSchedule';
+export { inferIndoorOutdoor } from './scoring';

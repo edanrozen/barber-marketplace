@@ -1,11 +1,24 @@
 import type { GeoCoordinates, MoodTag, PriceLevel } from './place';
+import type { WeatherConditionBucket } from './weather';
 
 export type Level0to3 = 0 | 1 | 2 | 3;
 export type EnergyLevel = 1 | 2 | 3 | 4 | 5;
 
-export interface WeatherSnapshot {
-  condition: 'clear' | 'clouds' | 'rain' | 'snow' | 'storm' | 'unknown';
-  tempC: number;
+/**
+ * The small, pre-digested weather shape the recommendation engine reads
+ * (engine/scoring.ts's weatherFitFactor, engine/reasons.ts). Derived from a
+ * real `WeatherCondition` fetch by `lib/weather.ts#toRecommendationWeather`
+ * — the engine never touches the raw provider response directly, so the
+ * weather provider can be swapped without touching scoring at all.
+ */
+export interface RecommendationWeather {
+  condition: WeatherConditionBucket;
+  temperature: number;
+  precipitationProbability: number | null;
+  isRaining: boolean;
+  isCold: boolean;
+  isHot: boolean;
+  isComfortableOutside: boolean;
 }
 
 /**
@@ -47,7 +60,7 @@ export interface UserState {
   budget: PriceLevel;
   groupSize: number;
 
-  weather: WeatherSnapshot | null;
+  weather: RecommendationWeather | null;
 }
 
 export const DEFAULT_USER_STATE: UserState = {

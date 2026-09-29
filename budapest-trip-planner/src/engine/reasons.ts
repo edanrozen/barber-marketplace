@@ -56,7 +56,18 @@ export function buildReasons(scored: ScoredPlace, ctx: RecommendationContext): s
     reasons.push('✓ לא דורש הזמנה מראש');
   }
 
-  return reasons.slice(0, 5);
+  // Weather only earns a line when it materially favored this specific pick
+  // (a strong weatherFitFactor ratio) — never a throwaway line on every
+  // recommendation regardless of relevance.
+  if (ctx.weather && factorRatio(scored, 'weather') >= STRONG_RATIO) {
+    if (ctx.weather.isRaining) {
+      reasons.push('🌧️ מתאים כי צפוי גשם ואתם צריכים מקום מקורה');
+    } else if (ctx.weather.isComfortableOutside) {
+      reasons.push('☀️ מתאים כי מזג האוויר טוב ויש לכם זמן להסתובב בחוץ');
+    }
+  }
+
+  return reasons.slice(0, 6);
 }
 
 /** The one honest line about hours, for when we simply don't know TODAY's status — never claims open OR closed without data. */

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, MapPin, RefreshCcw, Navigation, ChevronDown, ThumbsDown, CircleCheck, ShieldAlert, CircleOff } from 'lucide-react';
+import { Clock, MapPin, RefreshCcw, Navigation, ChevronDown, ThumbsDown, CircleCheck, ShieldAlert, CircleOff, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import type { ScoredPlace } from '@/types';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
@@ -36,24 +36,33 @@ export function RecommendationCard({
   const { place } = scored;
   const [showWhy, setShowWhy] = useState(false);
   const navUrl = mapsUrl(place);
+  const weatherReason = reasons.find((r) => r.startsWith('🌧️') || r.startsWith('☀️'));
+  const otherReasons = reasons.filter((r) => r !== weatherReason);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="overflow-hidden rounded-xl2 border border-accent-gold/30 bg-base-surface shadow-glow"
+      key={place.id}
+      initial={{ opacity: 0, y: 20, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+      className="overflow-hidden rounded-xl3 border-2 border-accent-gold/40 bg-base-surface shadow-glow"
     >
-      <div className="relative h-40 w-full bg-base-surface2">
+      <div className="relative h-44 w-full bg-gradient-to-br from-accent-gold/20 via-accent-violet/10 to-base-surface2">
         {place.image ? (
           <img src={place.image} alt={place.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-ink-muted">
-            <CategoryIcon category={place.category} size={40} />
+            <CategoryIcon category={place.category} size={48} />
           </div>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-accent-gold">
-          🎯 הבחירה שלנו
-        </span>
+        <motion.span
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-black/65 px-3 py-1.5 text-xs font-bold tracking-wide text-accent-gold"
+        >
+          <Sparkles size={12} />
+          ⭐ BEST MATCH
+        </motion.span>
       </div>
 
       <div className="space-y-3 p-4">
@@ -63,12 +72,18 @@ export function RecommendationCard({
             <span>{CATEGORY_LABELS[place.category]}</span>
             {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
           </div>
-          <h2 className="text-lg font-bold text-ink-primary">{place.name}</h2>
+          <h2 className="text-xl font-extrabold text-ink-primary">{place.name}</h2>
         </div>
 
         {explanation && (
           <p className="rounded-lg bg-base-surface2 p-3 text-sm leading-relaxed text-ink-secondary">
             {explanation}
+          </p>
+        )}
+
+        {weatherReason && (
+          <p className="flex items-center gap-2 rounded-lg bg-accent-violet/10 px-3 py-2 text-xs font-medium text-accent-violet">
+            {weatherReason}
           </p>
         )}
 
@@ -99,7 +114,7 @@ export function RecommendationCard({
 
         {hoursCaveat && <p className="text-xs text-ink-muted">⏱ {hoursCaveat}</p>}
 
-        {reasons.length > 0 && (
+        {otherReasons.length > 0 && (
           <div className="rounded-lg border border-base-border">
             <button
               type="button"
@@ -111,7 +126,7 @@ export function RecommendationCard({
             </button>
             {showWhy && (
               <ul className="flex flex-col gap-1 px-3 pb-3 text-xs text-ink-secondary">
-                {reasons.map((reason) => (
+                {otherReasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
               </ul>
@@ -121,15 +136,16 @@ export function RecommendationCard({
 
         <div className="flex gap-2 pt-1">
           {navUrl ? (
-            <a
+            <motion.a
               href={navUrl}
               target="_blank"
               rel="noreferrer"
               onClick={onGo}
-              className="flex-1 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 rounded-full bg-gradient-to-l from-accent-gold to-accent-violet py-3 text-center text-sm font-extrabold text-white shadow-glow"
             >
               יאללה לשם 🚀
-            </a>
+            </motion.a>
           ) : (
             <div
               className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full bg-base-surface2 px-3 py-2 text-center"
@@ -143,28 +159,31 @@ export function RecommendationCard({
             </div>
           )}
           {hasMoreAlternatives && (
-            <button
+            <motion.button
               type="button"
+              whileTap={{ scale: 0.95 }}
               onClick={onAnotherOption}
               className="flex items-center gap-1.5 rounded-full border border-base-border px-4 py-2.5 text-sm font-medium text-ink-secondary transition-colors hover:border-accent-gold/40 hover:text-accent-gold"
             >
               <RefreshCcw size={14} />
               אופציה אחרת
-            </button>
+            </motion.button>
           )}
         </div>
 
         <div className="flex gap-2">
-          <button
+          <motion.button
             type="button"
+            whileTap={{ scale: 0.95 }}
             onClick={onDismiss}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-base-border py-2 text-xs font-medium text-ink-muted transition-colors hover:border-accent-rose/40 hover:text-accent-rose"
           >
             <ThumbsDown size={13} />
             לא בא לנו
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             type="button"
+            whileTap={{ scale: justMarkedDone ? 1 : 0.95 }}
             onClick={onMarkDone}
             disabled={justMarkedDone}
             className={clsx(
@@ -174,9 +193,16 @@ export function RecommendationCard({
                 : 'border-base-border text-ink-muted hover:border-accent-teal/40 hover:text-accent-teal',
             )}
           >
-            <CircleCheck size={13} />
-            {justMarkedDone ? 'נרשם ✓' : 'עשינו את זה ✓'}
-          </button>
+            <motion.span
+              key={justMarkedDone ? 'done' : 'todo'}
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="flex items-center gap-1.5"
+            >
+              <CircleCheck size={13} />
+              {justMarkedDone ? 'נרשם ✓' : 'עשינו את זה ✓'}
+            </motion.span>
+          </motion.button>
         </div>
       </div>
     </motion.div>

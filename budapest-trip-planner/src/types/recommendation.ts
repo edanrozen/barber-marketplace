@@ -1,6 +1,6 @@
 import type { GeoCoordinates, MoodTag, Place, PriceLevel } from './place';
 import type { ScheduleItem, TripDay } from './trip';
-import type { EnergyLevel, Level0to3, WeatherSnapshot } from './userState';
+import type { EnergyLevel, Level0to3, RecommendationWeather } from './userState';
 
 /** One named factor that contributed to a place's score, kept for debugging/explanation — never shown raw to the user. */
 export interface ScoreFactor {
@@ -49,7 +49,7 @@ export interface RecommendationContext {
   mood: MoodTag | 'surprise_me' | null;
   budget: PriceLevel;
   groupSize: number;
-  weather: WeatherSnapshot | null;
+  weather: RecommendationWeather | null;
   visitedPlaces: string[];
 
   /** Place ids to skip this pass — backs "give me another option". */

@@ -124,6 +124,8 @@ export interface Place {
   website?: string;
   bookingUrl?: string;
   rating?: number;
+  /** "❤️ שמור" on the place detail screen — a personal shortlist flag, never read by the recommendation engine (Phase 6b). */
+  saved?: boolean;
 
   /** Only meaningful when `category === 'medical'`. Omitted fields mean "not verified", never "no"/"false" by default. */
   medicalFacilityType?: MedicalFacilityType;

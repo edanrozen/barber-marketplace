@@ -10,6 +10,7 @@ interface PlacesState {
   updatePlace: (id: string, patch: Partial<Place>) => void;
   setStatus: (id: string, status: PlaceStatus) => void;
   toggleVisited: (id: string) => void;
+  toggleSaved: (id: string) => void;
   removePlace: (id: string) => void;
 }
 
@@ -43,6 +44,12 @@ export const usePlacesStore = create<PlacesState>()(
         const place = get().places.find((p) => p.id === id);
         if (!place) return;
         get().updatePlace(id, { visited: !place.visited });
+      },
+
+      toggleSaved: (id) => {
+        const place = get().places.find((p) => p.id === id);
+        if (!place) return;
+        get().updatePlace(id, { saved: !place.saved });
       },
 
       removePlace: (id) => {
