@@ -14,6 +14,7 @@ export const MOOD_OPTIONS: MoodOption[] = [
   { id: 'hungry_a_lot', emoji: '🍕', label: 'רעבים ממש', categories: ['food'] },
   { id: 'drink', emoji: '🍸', label: 'בא לנו לשתות', categories: ['bar'] },
   { id: 'party', emoji: '🎉', label: 'בא לנו מסיבה', categories: ['club', 'bar', 'casino'] },
+  { id: 'casino', emoji: '🎰', label: 'בא לנו קזינו', categories: ['casino'] },
   { id: 'adrenaline', emoji: '🏎️', label: 'בא לנו אדרנלין', categories: ['adrenaline'] },
   { id: 'sightseeing', emoji: '🏛️', label: 'בא לנו לטייל', categories: ['attraction'] },
   { id: 'shopping', emoji: '🛍️', label: 'בא לנו שופינג', categories: ['shopping'] },

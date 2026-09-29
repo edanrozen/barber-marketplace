@@ -23,10 +23,16 @@ export function PlaceCard({ place }: { place: Place }): JSX.Element {
           <p className="truncate text-sm font-semibold text-ink-primary">{place.name}</p>
           <StatusBadge status={place.status} />
         </div>
-        <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-muted">
+        <p className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-ink-muted">
           <CategoryIcon category={place.category} size={12} />
           {CATEGORY_LABELS[place.category]}
-          {place.subcategory && <span>· {place.subcategory}</span>}
+          {place.subcategory && place.subcategory === 'Poker Room' ? (
+            <span className="rounded-full bg-accent-violet/15 px-1.5 py-0.5 text-[10px] font-bold text-accent-violet">
+              ♠️ Poker Room
+            </span>
+          ) : (
+            place.subcategory && <span>· {place.subcategory}</span>
+          )}
           {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
           <span>· {formatDuration(place.estimatedDurationMinutes)}</span>
         </p>

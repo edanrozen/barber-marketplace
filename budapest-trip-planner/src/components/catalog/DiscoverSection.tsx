@@ -33,9 +33,13 @@ export function DiscoverSection({ title, places }: DiscoverSectionProps): JSX.El
               </div>
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold text-ink-primary">{place.name}</p>
-                <p className="truncate text-[11px] text-ink-muted">
-                  {CATEGORY_LABELS[place.category]} · {formatDuration(place.estimatedDurationMinutes)}
-                </p>
+                {place.subcategory === 'Poker Room' ? (
+                  <p className="truncate text-[10px] font-bold text-accent-violet">♠️ Poker Room</p>
+                ) : (
+                  <p className="truncate text-[11px] text-ink-muted">
+                    {CATEGORY_LABELS[place.category]} · {formatDuration(place.estimatedDurationMinutes)}
+                  </p>
+                )}
               </div>
             </Link>
           </motion.div>

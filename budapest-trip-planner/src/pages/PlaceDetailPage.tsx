@@ -1,14 +1,16 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp, AlertTriangle, Phone, Heart, ThumbsDown, Star } from 'lucide-react';
+import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp, AlertTriangle, Phone, Heart, ThumbsDown, Star, ShieldAlert, Dices, Footprints } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
-import { usePlacesStore } from '@/store';
+import { usePlacesStore, useUserStateStore } from '@/store';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { EmptyState } from '@/components/common/EmptyState';
 import { formatDuration, getCurrentTime, hasKnownHoursForDay, isOpenAt } from '@/lib/time';
 import { mapsUrl } from '@/lib/maps';
+import { formatDistance, getTravelTime } from '@/lib/distance';
+import { HOTEL_MIKA } from '@/data/hotel';
 
 const STATUS_ACTIONS: { status: PlaceStatus; label: string }[] = [
   { status: 'AVAILABLE', label: 'זמין' },
@@ -25,6 +27,7 @@ export function PlaceDetailPage(): JSX.Element {
   const place = usePlacesStore((s) => s.places.find((p) => p.id === placeId));
   const setStatus = usePlacesStore((s) => s.setStatus);
   const toggleSaved = usePlacesStore((s) => s.toggleSaved);
+  const currentLocation = useUserStateStore((s) => s.currentLocation);
 
   const now = getCurrentTime();
   const hoursKnownToday = place ? hasKnownHoursForDay(place.openingHours, now) : false;
@@ -47,6 +50,10 @@ export function PlaceDetailPage(): JSX.Element {
 
   const navUrl = mapsUrl(place);
   const isMedical = place.category === 'medical';
+  const isCasino = place.category === 'casino';
+  const isPokerRoom = place.subcategory === 'Poker Room';
+  const effectiveLocation = currentLocation ?? HOTEL_MIKA.coordinates;
+  const travel = isCasino && place.coordinates ? getTravelTime(effectiveLocation, place.coordinates) : null;
 
   return (
     <div className="flex min-h-full flex-col gap-4 pb-6">
@@ -117,6 +124,54 @@ export function PlaceDetailPage(): JSX.Element {
             <AlertTriangle size={15} className="mt-0.5 shrink-0" />
             🚨 במקרה של סכנת חיים או מצב חירום רפואי מיידי — התקשרו לשירותי החירום המקומיים.
           </p>
+        )}
+
+        {isCasino && (
+          <>
+            <p className="flex items-start gap-2 rounded-lg bg-accent-rose/10 p-3 text-sm leading-relaxed text-accent-rose">
+              <ShieldAlert size={16} className="mt-0.5 shrink-0" />
+              <span>🎰 משחקים באחריות — הגדירו תקציב מראש ואל תחרגו ממנו.</span>
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span
+                className={clsx(
+                  'rounded-full px-2.5 py-1 font-bold',
+                  isPokerRoom ? 'bg-accent-violet/15 text-accent-violet' : 'bg-accent-gold/15 text-accent-gold',
+                )}
+              >
+                {isPokerRoom ? '♠️ Poker Room' : '🎰 Casino'}
+              </span>
+              {place.minimumAge && (
+                <span className="rounded-full bg-base-surface2 px-2.5 py-1 font-semibold text-ink-secondary">
+                  כניסה מגיל {place.minimumAge}+
+                </span>
+              )}
+            </div>
+
+            {place.gamesOffered && place.gamesOffered.length > 0 && (
+              <div>
+                <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-ink-muted">
+                  <Dices size={13} /> משחקים במקום
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {place.gamesOffered.map((game) => (
+                    <span key={game} className="rounded-full bg-base-surface2 px-2.5 py-1 text-xs text-ink-secondary">
+                      {game}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {travel && (
+              <p className="flex items-center gap-1.5 text-sm text-ink-secondary">
+                <Footprints size={14} />
+                {formatDistance(travel.distanceKm)} · כ-{travel.minutes} דק׳ הליכה
+                {!currentLocation && ' (מהמלון)'}
+              </p>
+            )}
+          </>
         )}
 
         {place.description && <p className="text-sm leading-relaxed text-ink-secondary">{place.description}</p>}

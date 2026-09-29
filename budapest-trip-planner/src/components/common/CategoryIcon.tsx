@@ -35,7 +35,7 @@ export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
   shopping: 'שופינג',
   adrenaline: 'אדרנלין',
   water: 'מים',
-  casino: 'קזינו',
+  casino: '🎰 קזינו',
   medical: 'רפואי',
 };
 

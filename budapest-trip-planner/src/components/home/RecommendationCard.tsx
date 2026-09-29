@@ -90,7 +90,7 @@ export function RecommendationCard({
         {place.category === 'casino' && (
           <p className="flex items-start gap-2 rounded-lg bg-accent-rose/10 p-3 text-sm leading-relaxed text-accent-rose">
             <ShieldAlert size={16} className="mt-0.5 shrink-0" />
-            <span>🎰 תקציב מוגדר מראש — וזהו.</span>
+            <span>🎰 משחקים באחריות — הגדירו תקציב מראש ואל תחרגו ממנו.</span>
           </p>
         )}
 

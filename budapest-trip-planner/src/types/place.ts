@@ -67,7 +67,11 @@ export type MoodTag =
   | 'sightseeing'
   | 'shopping'
   | 'coffee_sweet'
-  | 'chill';
+  | 'chill'
+  | 'casino'
+  | 'night'
+  | 'social'
+  | 'poker';
 
 export type GroupTag = 'couple' | 'friends' | 'family' | 'solo' | 'any';
 
@@ -133,4 +137,8 @@ export interface Place {
   open24Hours?: boolean;
   acceptsTourists?: boolean;
   phone?: string;
+
+  /** Only meaningful when `category === 'casino'`. `subcategory` distinguishes a Poker Room from a regular Casino floor for display purposes. */
+  minimumAge?: number;
+  gamesOffered?: string[];
 }
