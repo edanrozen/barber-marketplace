@@ -18,7 +18,13 @@ export const MOOD_OPTIONS: MoodOption[] = [
   { id: 'adrenaline', emoji: '🏎️', label: 'בא לנו אדרנלין', categories: ['adrenaline'] },
   { id: 'sightseeing', emoji: '🏛️', label: 'בא לנו לטייל', categories: ['attraction'] },
   { id: 'shopping', emoji: '🛍️', label: 'בא לנו שופינג', categories: ['shopping'] },
-  { id: 'coffee_sweet', emoji: '☕', label: 'קפה / מתוק', categories: ['cafe'] },
+  { id: 'coffee_sweet', emoji: '☕', label: 'קפה / מתוק', categories: ['cafe', 'dessert'] },
+  { id: 'dessert', emoji: '🍰', label: 'בא לנו קינוח', categories: ['dessert'] },
+  // Category-level match keeps every dessert place a candidate; the engine's
+  // moodMatchFactor already gives full points only to places whose moodTags
+  // include 'ice_cream' (gelato/ice pops), so those rank first without
+  // hard-excluding a kürtőskalács-only shop from ever surfacing here.
+  { id: 'ice_cream', emoji: '🍦', label: 'בא לנו גלידה', categories: ['dessert'] },
   { id: 'chill', emoji: '😴', label: 'משהו רגוע', categories: ['attraction', 'cafe', 'water'] },
   { id: 'surprise_me', emoji: '🎲', label: 'תפתיע אותנו', categories: [] },
 ];

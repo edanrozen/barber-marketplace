@@ -111,6 +111,7 @@ export function inferIndoorOutdoor(place: Place): NonNullable<Place['indoorOutdo
     case 'adrenaline':
     case 'water':
     case 'shopping':
+    case 'dessert':
       return 'indoor';
     case 'attraction':
       return 'outdoor';

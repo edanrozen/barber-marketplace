@@ -72,6 +72,8 @@ export function CatalogPage(): JSX.Element {
 
   const foodMood = useMemo(() => unvisited.filter((p) => p.category === 'food').slice(0, SECTION_SIZE), [unvisited]);
 
+  const desserts = useMemo(() => unvisited.filter((p) => p.category === 'dessert').slice(0, SECTION_SIZE), [unvisited]);
+
   const weatherMatch = useMemo(() => {
     const weather = userState.weather;
     if (!weather) return [];
@@ -80,8 +82,8 @@ export function CatalogPage(): JSX.Element {
   }, [unvisited, userState.weather]);
 
   const featuredIds = useMemo(
-    () => new Set([...popular, ...nearYou, ...tonight, ...foodMood, ...weatherMatch].map((p) => p.id)),
-    [popular, nearYou, tonight, foodMood, weatherMatch],
+    () => new Set([...popular, ...nearYou, ...tonight, ...foodMood, ...desserts, ...weatherMatch].map((p) => p.id)),
+    [popular, nearYou, tonight, foodMood, desserts, weatherMatch],
   );
   const maybeYoullLike = useMemo(
     () => unvisited.filter((p) => !featuredIds.has(p.id)).slice(0, SECTION_SIZE),
@@ -132,6 +134,7 @@ export function CatalogPage(): JSX.Element {
           <DiscoverSection title="📍 קרוב אליכם" places={nearYou} />
           <DiscoverSection title="🍸 מתאים להערב" places={tonight} />
           <DiscoverSection title="🍔 לפי מצב רוח" places={foodMood} />
+          <DiscoverSection title="🍰 קינוחים בסביבה" places={desserts} />
           <DiscoverSection
             title={userState.weather?.isRaining ? '🌧️ מתאים למזג האוויר' : '☀️ מתאים למזג האוויר'}
             places={weatherMatch}

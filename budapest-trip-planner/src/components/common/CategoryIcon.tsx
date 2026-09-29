@@ -9,6 +9,7 @@ import {
   Landmark,
   Waves,
   Cross,
+  IceCreamCone,
   type LucideIcon,
 } from 'lucide-react';
 import type { PlaceCategory } from '@/types';
@@ -24,6 +25,7 @@ const ICONS: Record<PlaceCategory, LucideIcon> = {
   water: Waves,
   casino: Dices,
   medical: Cross,
+  dessert: IceCreamCone,
 };
 
 export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
@@ -37,6 +39,7 @@ export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
   water: 'מים',
   casino: '🎰 קזינו',
   medical: 'רפואי',
+  dessert: '🍰 קינוחים',
 };
 
 interface CategoryIconProps {

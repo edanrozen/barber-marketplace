@@ -31,8 +31,13 @@ export function PlaceCard({ place, distanceKm }: PlaceCardProps): JSX.Element {
           <p className="truncate text-sm font-semibold text-ink-primary">{place.name}</p>
           <div className="flex shrink-0 items-center gap-1.5">
             {place.rating !== undefined && (
-              <span className="flex items-center gap-0.5 text-[11px] font-semibold text-accent-gold">
-                <Star size={11} fill="currentColor" /> {place.rating.toFixed(1)}
+              <span className="flex flex-col items-end leading-tight">
+                <span className="flex items-center gap-0.5 text-[11px] font-semibold text-accent-gold">
+                  <Star size={11} fill="currentColor" /> {place.rating.toFixed(1)}
+                </span>
+                {place.reviewCount !== undefined && (
+                  <span className="text-[9px] text-ink-muted">{place.reviewCount.toLocaleString()}+ ביקורות</span>
+                )}
               </span>
             )}
             <StatusBadge status={place.status} />

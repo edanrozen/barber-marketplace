@@ -91,6 +91,9 @@ export function PlaceDetailPage(): JSX.Element {
             {place.rating !== undefined && (
               <span className="flex items-center gap-0.5 text-accent-gold">
                 <Star size={12} fill="currentColor" /> {place.rating.toFixed(1)}
+                {place.reviewCount !== undefined && (
+                  <span className="text-ink-muted">· {place.reviewCount.toLocaleString()}+ ביקורות</span>
+                )}
               </span>
             )}
           </div>

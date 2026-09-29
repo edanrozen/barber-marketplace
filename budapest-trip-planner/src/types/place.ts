@@ -14,7 +14,8 @@ export type PlaceCategory =
   | 'adrenaline'
   | 'water'
   | 'casino'
-  | 'medical';
+  | 'medical'
+  | 'dessert';
 
 /**
  * `medical` places are structurally different from every other category:
@@ -71,7 +72,9 @@ export type MoodTag =
   | 'casino'
   | 'night'
   | 'social'
-  | 'poker';
+  | 'poker'
+  | 'dessert'
+  | 'ice_cream';
 
 export type GroupTag = 'couple' | 'friends' | 'family' | 'solo' | 'any';
 
@@ -128,6 +131,8 @@ export interface Place {
   website?: string;
   bookingUrl?: string;
   rating?: number;
+  /** Verified review count backing `rating`, when a reliable source gives one. Omitted, never guessed, when unknown. */
+  reviewCount?: number;
   /** "❤️ שמור" on the place detail screen — a personal shortlist flag, never read by the recommendation engine (Phase 6b). */
   saved?: boolean;
 
