@@ -1,0 +1,96 @@
+name: Deploy Budapest Trip Planner (GitHub Pages)
+
+on:
+  push:
+    branches: [claude/budapest-ai-trip-planner-kj6i1z]
+    paths:
+      - "budapest-trip-planner/**"
+      - ".github/workflows/deploy-budapest-trip-planner.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    defaults:
+      run:
+        working-directory: budapest-trip-planner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: budapest-trip-planner/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build (standalone app — its own package.json, not an npm workspace)
+        run: npm run build
+      # GitHub Pages has no server-side rewrites, so a hard refresh on a
+      # client-side route (e.g. /today) 404s. The standard SPA fix: Pages
+      # always serves a custom 404.html for any unmatched path, so a copy
+      # of index.html there makes the app shell load and React Router take
+      # over from its own basename/BASE_URL — no query-string redirect hack
+      # needed since this app uses BrowserRouter with a plain basename.
+      - name: SPA fallback for deep-link refresh
+        run: cp dist/index.html dist/404.html
+      # `enablement: true` is the critical part: without it this action only
+      # READS the Pages config and leaves it alone. This repo's Pages site
+      # was already configured as "Deploy from a branch" (legacy/Jekyll,
+      # serving the repo root — which has no index.html, so GitHub falls
+      # back to rendering README.md, exactly what we saw live). That legacy
+      # pipeline auto-rebuilds on every push regardless of this workflow, and
+      # a successful `deploy-pages` call earlier never actually overrides it
+      # unless the site's build_type is switched to "workflow" first.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: budapest-trip-planner/dist
+      # Belt-and-suspenders: this repo's Pages site was found already
+      # configured as "Deploy from a branch" (legacy), which serves this
+      # branch's repo ROOT directly and ignores the Actions artifact above
+      # entirely — regardless of whether `configure-pages` above actually
+      # took effect. Keeping a real, working copy of the app at the repo
+      # root guarantees the live site is correct either way. Uses a
+      # dedicated `bp-assets/` folder (not `assets/`) to avoid colliding
+      # with the unrelated barber-marketplace assets folder already there.
+      - name: Sync GitHub Pages root fallback (for the classic branch-deploy path)
+        working-directory: ${{ github.workspace }}
+        run: |
+          cp budapest-trip-planner/dist/index.html index.html
+          cp budapest-trip-planner/dist/404.html 404.html
+          rm -rf bp-assets
+          cp -r budapest-trip-planner/dist/bp-assets bp-assets
+          touch .nojekyll
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html 404.html bp-assets .nojekyll
+          if git diff --cached --quiet; then
+            echo "Root fallback already up to date."
+          else
+            git commit -m "chore: sync GitHub Pages root fallback [skip ci]"
+            git push
+          fi
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
