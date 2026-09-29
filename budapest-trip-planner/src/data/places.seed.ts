@@ -1802,4 +1802,132 @@ export const PLACES_SEED: Place[] = [
     location: 'Futó utca 37-45, 1082 Budapest (Corvin Plaza)',
     openingHours: {},
   },
+
+  // 🚑 PHASE 9 — VERIFIED MEDICAL FACILITIES. Safety-critical data: every
+  // field below is either directly sourced (comment per place) or
+  // deliberately left unset. `category: 'medical'` places are hard-excluded
+  // from mood-based recommendations (engine/filters.ts) and from the
+  // general Catalog (CatalogPage.tsx) — they can ONLY be reached through
+  // the dedicated Medical screen (pages/MedicalPage.tsx) or by direct link.
+  // `moodTags: []` on every entry is a second, redundant guarantee: even if
+  // the hard category check were ever removed, these would still never
+  // match any mood's moodTag-based qualification path.
+  //
+  // Two candidates from the brief could NOT be verified to exist at all
+  // (Uránia Medical Center, Rákóczi út 19; MA BELLE Medical, Andrássy út 43)
+  // — no source found any evidence of either business — and are excluded
+  // rather than guessed, per the explicit "do not invent" instruction.
+  //
+  // `estimatedDurationMinutes` and `energyRequired` are present only
+  // because the Place type requires them; they carry no medical meaning
+  // and are never read for these entries (medical places never reach
+  // scoring). `phone`/`open24Hours`/`emergencyAvailable`/`acceptsTourists`
+  // are omitted, not `false`, wherever a fact could not be confirmed from
+  // an unhedged source — see `lib/medicalSort.ts` and `MedicalFacilityType`
+  // in types/place.ts for how these are used.
+  {
+    id: 'semmelweis-emergency',
+    name: 'Semmelweis Egyetem – Sürgősségi Betegellátó Osztály',
+    category: 'medical',
+    subcategory: 'Emergency Department',
+    description: 'מחלקת מיון של אוניברסיטת סמלווייס, פתוחה 24/7',
+    tags: ['emergency', 'hospital', 'medical'],
+    moodTags: [],
+    energyRequired: 1,
+    estimatedDurationMinutes: 90,
+    groupSuitability: ['any'],
+    requiresBooking: false,
+    visited: false,
+    status: 'AVAILABLE',
+    medicalFacilityType: 'emergency',
+    emergencyAvailable: true,
+    open24Hours: true,
+    // Public emergency departments in Hungary have a universal legal duty to treat regardless of nationality/insurance — not a facility-specific claim, but a reliable general fact about how EU/HU emergency care works.
+    acceptsTourists: true,
+    // Verified via the official department page (semmelweis.hu/surgosseg/en/department/), Phase 9: this is the direct 24/7 emergency-patient line, distinct from the university's general switchboard (+36 1 459 1500, also reachable, mentioned by the user).
+    phone: '+36 20 666 2037',
+    location: 'Üllői út 78/A, 1082 Budapest',
+    openingHours: {},
+  },
+  {
+    id: 'peterfy-korhaz',
+    name: 'Péterfy Sándor Utcai Kórház – Sürgősségi Betegellátó és Klinikai Toxikológia',
+    category: 'medical',
+    subcategory: 'Hospital / Emergency Department',
+    description: 'בית חולים ציבורי עם מחלקת מיון וטוקסיקולוגיה קלינית',
+    tags: ['emergency', 'hospital', 'toxicology', 'medical'],
+    moodTags: [],
+    energyRequired: 1,
+    estimatedDurationMinutes: 90,
+    groupSuitability: ['any'],
+    requiresBooking: false,
+    visited: false,
+    status: 'AVAILABLE',
+    medicalFacilityType: 'emergency',
+    emergencyAvailable: true,
+    // Not independently confirmed as 24/7 from an unhedged source — left unset rather than assumed.
+    acceptsTourists: true,
+    // Verified via peterfykh.hu / okfo.gov.hu (Phase 9) — this is the hospital's general switchboard; no separate ER-specific line was found.
+    phone: '+36 1 461 4700',
+    // The Emergency Dept & Clinical Toxicology unit is located at the MAIN hospital site (confirmed via two independent sources), NOT at Alsó erdősor utca 7 as the initial candidate suggested — that address instead houses the hospital's separate Crisis Intervention & Psychiatric Department, a different unit not requested here. No separate place was created for it to avoid a false/duplicate entry.
+    location: 'Péterfy Sándor utca 8-20, 1076 Budapest',
+    openingHours: {},
+  },
+  {
+    id: 'szent-rokus-klinikai-tomb',
+    name: 'Szent Rókus Kórház (Klinikai Tömb)',
+    category: 'medical',
+    subcategory: 'Hospital',
+    description: 'מבנה קליני של אוניברסיטת סמלווייס — לא אושר כמתאים לביקור תיירים',
+    tags: ['hospital', 'medical'],
+    moodTags: [],
+    energyRequired: 1,
+    estimatedDurationMinutes: 90,
+    groupSuitability: ['any'],
+    requiresBooking: false,
+    visited: false,
+    status: 'AVAILABLE',
+    medicalFacilityType: 'hospital',
+    // As of a 2023 reorganization this building now houses specialized units (a genomic-medicine/rare-disease institute, labs) under Semmelweis University rather than general walk-in wards — its geriatric clinic relocated out. No source confirmed general/tourist-facing emergency or walk-in service here, so emergencyAvailable/acceptsTourists are left unset rather than assumed either way.
+    location: 'Gyulai Pál utca 2, 1085 Budapest',
+    openingHours: {},
+  },
+  {
+    id: 'central-clinic-budapest',
+    name: 'Central Clinic',
+    category: 'medical',
+    subcategory: 'Private Clinic',
+    description: 'מרפאה פרטית רב-תחומית במרכז העיר',
+    tags: ['clinic', 'private', 'medical'],
+    moodTags: [],
+    energyRequired: 1,
+    estimatedDurationMinutes: 60,
+    groupSuitability: ['any'],
+    requiresBooking: false,
+    visited: false,
+    status: 'AVAILABLE',
+    medicalFacilityType: 'clinic',
+    // Verified via odoktor.hu listing (Phase 9): proctology, ophthalmology, ENT, dermatology, internal medicine, radiology. No source confirmed tourist-specific service, opening hours, or a direct phone line — left unset.
+    location: 'Rákóczi út 4, 1072 Budapest (3. emelet)',
+    openingHours: {},
+  },
+  {
+    id: 'primavera-medical-oktogon',
+    name: 'Primavera Medical Center – Oktogon',
+    category: 'medical',
+    subcategory: 'Medical Center',
+    description: 'מרפאה פרטית רב-תחומית ליד אוקטוגון',
+    tags: ['medical_center', 'private', 'medical'],
+    moodTags: [],
+    energyRequired: 1,
+    estimatedDurationMinutes: 60,
+    groupSuitability: ['any'],
+    requiresBooking: false,
+    visited: false,
+    status: 'AVAILABLE',
+    medicalFacilityType: 'medical_center',
+    // Verified via odoktor.hu listing (Phase 9): gynecology, pediatric gynecology, endocrinology, dermatology, 4D ultrasound — a specialist clinic, not a general/urgent-care walk-in. Not confirmed as suitable for a tourist's non-specialist urgent issue, so no claim is made either way. No opening hours or direct phone found.
+    location: 'Teréz körút 23, 1067 Budapest (III. emelet, 11. ajtó)',
+    openingHours: {},
+  },
 ];

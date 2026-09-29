@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Car, Clock3 } from 'lucide-react';
+import { ArrowRight, Car, Clock3, Cross } from 'lucide-react';
 import { usePlacesStore, useTripStore, useUserStateStore, useRecommendationHistoryStore } from '@/store';
 import {
   getRecommendation,
@@ -166,6 +167,13 @@ export function HomePage(): JSX.Element {
         </div>
         <p className="mt-1 text-sm text-ink-secondary">מה בא לכם עכשיו?</p>
         <p className="mt-0.5 text-xs font-medium text-accent-teal">לא התבזת לא נהנת 🎉</p>
+        <Link
+          to="/medical"
+          className="mt-2 flex w-fit items-center gap-1.5 rounded-full border border-accent-rose/40 bg-accent-rose/10 px-3 py-1.5 text-xs font-bold text-accent-rose transition-colors hover:bg-accent-rose/20"
+        >
+          <Cross size={13} />
+          🚑 עזרה רפואית
+        </Link>
         <div className="mt-2 flex items-center justify-between">
           {tripState.nextFixedActivity && (
             <p className="text-xs text-ink-muted">

@@ -13,7 +13,18 @@ export type PlaceCategory =
   | 'shopping'
   | 'adrenaline'
   | 'water'
-  | 'casino';
+  | 'casino'
+  | 'medical';
+
+/**
+ * `medical` places are structurally different from every other category:
+ * they must NEVER be scored or suggested by the mood-recommendation engine
+ * (see `engine/filters.ts`'s hard category exclusion) and never appear in
+ * the general Catalog — they only surface through the dedicated Medical
+ * screen (`pages/MedicalPage.tsx`). This is a safety requirement, not a UX
+ * preference.
+ */
+export type MedicalFacilityType = 'hospital' | 'emergency' | 'medical_center' | 'clinic';
 
 export type IndoorOutdoor = 'indoor' | 'outdoor' | 'both';
 
@@ -113,4 +124,11 @@ export interface Place {
   website?: string;
   bookingUrl?: string;
   rating?: number;
+
+  /** Only meaningful when `category === 'medical'`. Omitted fields mean "not verified", never "no"/"false" by default. */
+  medicalFacilityType?: MedicalFacilityType;
+  emergencyAvailable?: boolean;
+  open24Hours?: boolean;
+  acceptsTourists?: boolean;
+  phone?: string;
 }

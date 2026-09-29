@@ -2,7 +2,9 @@ import clsx from 'clsx';
 import type { PlaceCategory } from '@/types';
 import { CATEGORY_LABELS } from '@/components/common/CategoryIcon';
 
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as PlaceCategory[];
+// Medical facilities never appear in the general catalog — they only
+// surface through the dedicated Medical screen — so they get no filter chip here.
+const CATEGORIES = (Object.keys(CATEGORY_LABELS) as PlaceCategory[]).filter((c) => c !== 'medical');
 
 interface FilterBarProps {
   activeCategories: PlaceCategory[];

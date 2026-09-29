@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
   Landmark,
   Waves,
+  Cross,
   type LucideIcon,
 } from 'lucide-react';
 import type { PlaceCategory } from '@/types';
@@ -22,6 +23,7 @@ const ICONS: Record<PlaceCategory, LucideIcon> = {
   adrenaline: Bike,
   water: Waves,
   casino: Dices,
+  medical: Cross,
 };
 
 export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
@@ -34,6 +36,7 @@ export const CATEGORY_LABELS: Record<PlaceCategory, string> = {
   adrenaline: 'אדרנלין',
   water: 'מים',
   casino: 'קזינו',
+  medical: 'רפואי',
 };
 
 interface CategoryIconProps {

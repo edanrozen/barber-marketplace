@@ -7,6 +7,7 @@ import { CatalogPage } from './pages/CatalogPage';
 import { PlaceDetailPage } from './pages/PlaceDetailPage';
 import { UserStatePage } from './pages/UserStatePage';
 import { ScheduleItemEditorPage } from './pages/ScheduleItemEditorPage';
+import { MedicalPage } from './pages/MedicalPage';
 
 export default function App(): JSX.Element {
   const { pathname } = useLocation();
@@ -21,6 +22,7 @@ export default function App(): JSX.Element {
           <Route path="/place/:placeId" element={<PlaceDetailPage />} />
           <Route path="/state" element={<UserStatePage />} />
           <Route path="/schedule" element={<ScheduleItemEditorPage />} />
+          <Route path="/medical" element={<MedicalPage />} />
         </Routes>
       </ErrorBoundary>
     </AppShell>

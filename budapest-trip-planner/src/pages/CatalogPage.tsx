@@ -7,7 +7,10 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { isOpenAt } from '@/lib/time';
 
 export function CatalogPage(): JSX.Element {
-  const places = usePlacesStore((s) => s.places);
+  const allPlaces = usePlacesStore((s) => s.places);
+  // Medical facilities only surface through the dedicated Medical screen —
+  // excluded before anything else touches this page's notion of "the catalog".
+  const places = useMemo(() => allPlaces.filter((p) => p.category !== 'medical'), [allPlaces]);
   const [activeCategories, setActiveCategories] = useState<PlaceCategory[]>([]);
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [hideVisited, setHideVisited] = useState(false);

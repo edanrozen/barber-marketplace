@@ -57,6 +57,11 @@ function passesMood(place: Place, ctx: RecommendationContext): boolean {
  */
 export function filterCandidates(places: Place[], ctx: RecommendationContext): Place[] {
   return places.filter((place) => {
+    // Safety-critical, not a style choice: medical facilities must NEVER be
+    // suggested through mood-based recommendations (including "surprise
+    // me", which otherwise bypasses every mood's category list entirely).
+    // This check comes before anything else and is unconditional.
+    if (place.category === 'medical') return false;
     if (place.status !== 'AVAILABLE') return false;
     if (ctx.excludeIds.includes(place.id)) return false;
     if (!passesMood(place, ctx)) return false;

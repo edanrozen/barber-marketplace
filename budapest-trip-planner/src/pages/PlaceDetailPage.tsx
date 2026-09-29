@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp } from 'lucide-react';
+import { ArrowRight, ExternalLink, MapPin, Navigation, CircleOff, StickyNote, Clock3, CircleHelp, AlertTriangle, Phone } from 'lucide-react';
 import clsx from 'clsx';
 import type { PlaceStatus } from '@/types';
 import { usePlacesStore } from '@/store';
@@ -44,6 +44,7 @@ export function PlaceDetailPage(): JSX.Element {
   }
 
   const navUrl = mapsUrl(place);
+  const isMedical = place.category === 'medical';
 
   return (
     <div className="flex min-h-full flex-col gap-4 pb-6">
@@ -100,7 +101,24 @@ export function PlaceDetailPage(): JSX.Element {
           )}
         </div>
 
+        {isMedical && (
+          <p className="flex items-start gap-2 rounded-lg bg-accent-rose/10 p-3 text-xs font-medium leading-relaxed text-accent-rose">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+            🚨 במקרה של סכנת חיים או מצב חירום רפואי מיידי — התקשרו לשירותי החירום המקומיים.
+          </p>
+        )}
+
         {place.description && <p className="text-sm leading-relaxed text-ink-secondary">{place.description}</p>}
+
+        {isMedical && place.phone && (
+          <a
+            href={`tel:${place.phone.replace(/\s+/g, '')}`}
+            className="flex items-center justify-center gap-1.5 rounded-full border border-accent-rose/40 py-2 text-sm font-semibold text-accent-rose"
+          >
+            <Phone size={14} />
+            {place.phone}
+          </a>
+        )}
 
         {place.notes && (
           <p
@@ -133,10 +151,13 @@ export function PlaceDetailPage(): JSX.Element {
             href={navUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-1.5 rounded-full bg-accent-gold py-2.5 text-center text-sm font-bold text-base-bg transition-transform active:scale-95"
+            className={clsx(
+              'flex items-center justify-center gap-1.5 rounded-full py-2.5 text-center text-sm font-bold transition-transform active:scale-95',
+              isMedical ? 'bg-accent-rose text-white' : 'bg-accent-gold text-base-bg',
+            )}
           >
             <Navigation size={15} />
-            ניווט למקום
+            {isMedical ? 'נווטו לשם 🚑' : 'ניווט למקום'}
           </a>
         ) : (
           <div
