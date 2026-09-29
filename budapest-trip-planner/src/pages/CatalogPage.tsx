@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import type { PlaceCategory } from '@/types';
 import { usePlacesStore, useUserStateStore } from '@/store';
 import { FilterBar } from '@/components/catalog/FilterBar';
 import { PlaceCard } from '@/components/catalog/PlaceCard';
 import { DiscoverSection } from '@/components/catalog/DiscoverSection';
+import { SearchBar } from '@/components/catalog/SearchBar';
+import { SearchEmptyState } from '@/components/catalog/SearchEmptyState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { isOpenAt } from '@/lib/time';
 import { haversineKm } from '@/lib/distance';
+import { searchPlaces } from '@/lib/search';
 import { inferIndoorOutdoor } from '@/engine/recommendationEngine';
 
 const SECTION_SIZE = 8;
@@ -20,6 +24,9 @@ export function CatalogPage(): JSX.Element {
   const [activeCategories, setActiveCategories] = useState<PlaceCategory[]>([]);
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [hideVisited, setHideVisited] = useState(false);
+  const [query, setQuery] = useState('');
+  const isSearching = query.trim().length > 0;
+  const searchResults = useMemo(() => (isSearching ? searchPlaces(places, query) : []), [places, query, isSearching]);
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -88,45 +95,80 @@ export function CatalogPage(): JSX.Element {
         <p className="mt-1 text-sm text-ink-secondary">{places.length} מקומות במאגר לגלות בבודפשט</p>
       </div>
 
-      <DiscoverSection title="🔥 פופולרי" places={popular} />
-      <DiscoverSection title="📍 קרוב אליכם" places={nearYou} />
-      <DiscoverSection title="🍸 מתאים להערב" places={tonight} />
-      <DiscoverSection title="🍔 לפי מצב רוח" places={foodMood} />
-      <DiscoverSection
-        title={userState.weather?.isRaining ? '🌧️ מתאים למזג האוויר' : '☀️ מתאים למזג האוויר'}
-        places={weatherMatch}
-      />
-      <DiscoverSection title="✨ אולי תאהבו" places={maybeYoullLike} />
+      <SearchBar value={query} onChange={setQuery} />
 
-      <div>
-        <h2 className="mb-2 px-4 text-sm font-extrabold text-ink-primary">🔍 כל האפשרויות</h2>
-        <FilterBar
-          activeCategories={activeCategories}
-          onToggleCategory={toggleCategory}
-          openNowOnly={openNowOnly}
-          onToggleOpenNow={() => setOpenNowOnly((v) => !v)}
-          hideVisited={hideVisited}
-          onToggleHideVisited={() => setHideVisited((v) => !v)}
-        />
-
-        {filtered.length === 0 ? (
-          <EmptyState
-            emoji="🗺️"
-            title={places.length === 0 ? 'עדיין אין מקומות במאגר' : 'אין תוצאות לפילטרים האלה'}
-            description={
-              places.length === 0
-                ? 'הוסיפו מקומות למאגר (src/data/places.seed.ts או דרך ה-store) כדי לראות אותם כאן.'
-                : 'ניקוי חלק מהפילטרים יחזיר תוצאות.'
-            }
+      {isSearching ? (
+        <div className="px-4">
+          {searchResults.length === 0 ? (
+            <SearchEmptyState query={query} onClear={() => setQuery('')} />
+          ) : (
+            <>
+              <p className="mb-2 text-xs font-medium text-ink-muted">{searchResults.length} תוצאות עבור "{query}"</p>
+              <div className="flex flex-col gap-2">
+                {searchResults.map((place, i) => (
+                  <motion.div
+                    key={place.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                  >
+                    <PlaceCard
+                      place={place}
+                      distanceKm={
+                        userState.currentLocation && place.coordinates
+                          ? haversineKm(userState.currentLocation, place.coordinates)
+                          : undefined
+                      }
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          <DiscoverSection title="🔥 פופולרי" places={popular} />
+          <DiscoverSection title="📍 קרוב אליכם" places={nearYou} />
+          <DiscoverSection title="🍸 מתאים להערב" places={tonight} />
+          <DiscoverSection title="🍔 לפי מצב רוח" places={foodMood} />
+          <DiscoverSection
+            title={userState.weather?.isRaining ? '🌧️ מתאים למזג האוויר' : '☀️ מתאים למזג האוויר'}
+            places={weatherMatch}
           />
-        ) : (
-          <div className="mt-3 flex flex-col gap-2 px-4">
-            {filtered.map((place) => (
-              <PlaceCard key={place.id} place={place} />
-            ))}
+          <DiscoverSection title="✨ אולי תאהבו" places={maybeYoullLike} />
+
+          <div>
+            <h2 className="mb-2 px-4 text-sm font-extrabold text-ink-primary">🔍 כל האפשרויות</h2>
+            <FilterBar
+              activeCategories={activeCategories}
+              onToggleCategory={toggleCategory}
+              openNowOnly={openNowOnly}
+              onToggleOpenNow={() => setOpenNowOnly((v) => !v)}
+              hideVisited={hideVisited}
+              onToggleHideVisited={() => setHideVisited((v) => !v)}
+            />
+
+            {filtered.length === 0 ? (
+              <EmptyState
+                emoji="🗺️"
+                title={places.length === 0 ? 'עדיין אין מקומות במאגר' : 'אין תוצאות לפילטרים האלה'}
+                description={
+                  places.length === 0
+                    ? 'הוסיפו מקומות למאגר (src/data/places.seed.ts או דרך ה-store) כדי לראות אותם כאן.'
+                    : 'ניקוי חלק מהפילטרים יחזיר תוצאות.'
+                }
+              />
+            ) : (
+              <div className="mt-3 flex flex-col gap-2 px-4">
+                {filtered.map((place) => (
+                  <PlaceCard key={place.id} place={place} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

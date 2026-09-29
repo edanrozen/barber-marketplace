@@ -1,10 +1,18 @@
 import { Link } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import type { Place } from '@/types';
 import { CATEGORY_LABELS, CategoryIcon } from '@/components/common/CategoryIcon';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { formatDuration } from '@/lib/time';
+import { formatDistance } from '@/lib/distance';
 
-export function PlaceCard({ place }: { place: Place }): JSX.Element {
+interface PlaceCardProps {
+  place: Place;
+  /** Straight-line distance from the viewer's current reference point, if GPS is available — omitted when unknown, never guessed. */
+  distanceKm?: number | undefined;
+}
+
+export function PlaceCard({ place, distanceKm }: PlaceCardProps): JSX.Element {
   return (
     <Link
       to={`/place/${place.id}`}
@@ -21,7 +29,14 @@ export function PlaceCard({ place }: { place: Place }): JSX.Element {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="truncate text-sm font-semibold text-ink-primary">{place.name}</p>
-          <StatusBadge status={place.status} />
+          <div className="flex shrink-0 items-center gap-1.5">
+            {place.rating !== undefined && (
+              <span className="flex items-center gap-0.5 text-[11px] font-semibold text-accent-gold">
+                <Star size={11} fill="currentColor" /> {place.rating.toFixed(1)}
+              </span>
+            )}
+            <StatusBadge status={place.status} />
+          </div>
         </div>
         <p className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-ink-muted">
           <CategoryIcon category={place.category} size={12} />
@@ -35,6 +50,7 @@ export function PlaceCard({ place }: { place: Place }): JSX.Element {
           )}
           {place.priceLevel && <span>· {'₪'.repeat(place.priceLevel)}</span>}
           <span>· {formatDuration(place.estimatedDurationMinutes)}</span>
+          {distanceKm !== undefined && <span>· {formatDistance(distanceKm)}</span>}
         </p>
         {place.location && <p className="mt-1 truncate text-xs text-ink-secondary">{place.location}</p>}
       </div>
